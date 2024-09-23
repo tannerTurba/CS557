@@ -11,6 +11,23 @@ public class Point {
         }
     }
 
+    public double[] augment(int degree) {
+        double[] result = new double[(inputs.length * 2) + 1];
+
+        // place 1 at index 0
+        result[0] = 1;
+
+        // Copy original array, placing start at index 1
+        System.arraycopy(inputs, 0, result, 1, inputs.length);
+
+        // Fill array with inputs, raised to the specified degree
+        for (int i = inputs.length + 1; i < result.length; i++) {
+            result[i] = Math.pow(inputs[i - inputs.length - 1], degree);
+        }
+
+        return result;
+    }
+
     /**
      * @return Double[] return the inputs
      */
@@ -42,7 +59,7 @@ public class Point {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("Inputs: [");
+        sb.append("\nInputs: [");
         for (int i = 0; i < inputs.length; i++) {
             sb.append(inputs[i]);
 
