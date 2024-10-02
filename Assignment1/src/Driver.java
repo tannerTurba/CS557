@@ -11,6 +11,7 @@ class Driver {
     private int batchSize = 0;
     private boolean isRandom = false;
     private int verbosity = 1;
+    private StringBuilder sBuilder = new StringBuilder();
 
     public Driver(String[] args) {
         for (int i = 0; i < args.length; i++) {
@@ -76,19 +77,44 @@ class Driver {
         return sb.toString();
     }
     
-    private double[] miniBatchGradientDescent(Point[] data) {
-        // double[][] weights = new double[data.length][batchSize];
-        int numOfAttrs = data[0].getInputs().length;
+    private double[] miniBatchGradientDescent(Point[] data, int degree) {
+        for (Point point : data) {
+            point.augment(degree);
+        }
         
+        int numOfAttrs = data[0].getAugmented().length;
         ArrayList<double[]> weights = new ArrayList<>();
         weights.add(0, new double[numOfAttrs]);
         
-        double currentCost = 0.0;
+        double currentCost = 9999.0;
         double lastCost = 0.0;
         int numberOfBatches = batchSize <= 0 ? 1 : data.length / batchSize;
         int t = 0;
         int e = 0;
-        while (e <= epochLimit && currentCost > Math.pow(10, -10) && Math.abs(lastCost - currentCost) > Math.pow(10, -10)) {
+        if (verbosity > 1) {
+            sBuilder.append("      * Beginning mini-batch gradient descent\n");
+            sBuilder.append(String.format("        (alpha=%f, epochLimit=%d, batchSize=%d)\n", learningRate, epochLimit, batchSize));
+        }
+        if (verbosity > 2) {
+            sBuilder.append(String.format("        Initial model with zero weights   : Cost = %9.9f\n", calcError(data, weights.get(0)) / numberOfBatches));
+        }
+        
+        long startTime = System.currentTimeMillis();
+        String stopReason = "        GD Stop condition: ";
+        while (true) {
+            if (e > epochLimit) {
+                stopReason += "epochLimit reached\n";
+                break;
+            }
+            else if (currentCost <= Math.pow(10, -10)) {
+                stopReason += "CurrentCost ~= 0\n";
+                break;
+            }
+            else if (Math.abs(lastCost - currentCost) <= Math.pow(10, -10)) {
+                stopReason += "DeltaCost ~= 0\n";
+                break;
+            }
+
             ArrayList<int[]> batchIndices = createBatches(data, numberOfBatches);
 
             // For each batch
@@ -105,8 +131,22 @@ class Driver {
             }
             lastCost = currentCost;
             currentCost = calcError(data, weights.get(t-1)) / numberOfBatches;
+            if (verbosity > 2 && e > 0 && e % 1000 == 0) {
+                sBuilder.append(String.format("        After %d epochs ( %d iter.): Cost = %.9f\n", e, t, currentCost));
+            }
             e++;
         }
+        
+        if (verbosity > 2) {
+            sBuilder.append(String.format("        After %d epochs ( %d iter.): Cost = %.9f\n", e, t, currentCost));
+        }
+        if (verbosity > 1) {
+            long totalTime = System.currentTimeMillis() - startTime;
+            sBuilder.append("      * Done with fitting!\n");
+            sBuilder.append(String.format("        Training took %dms, %d epochs, %d iterations (%.4fms / iteration)\n", totalTime, e, t, 9.0/totalTime));
+            sBuilder.append(stopReason);
+        }
+
         return weights.get(t);
     }
 
@@ -114,15 +154,15 @@ class Driver {
         double sum = 0.0;
         for (int i : batchIndices) {
             Point dPoint = data[i];
-            sum += (-2 * dPoint.getInputs()[k]) * innerChunk(dPoint, oldWeight, i, k);
+            sum += (-2 * dPoint.getAugmented()[k]) * innerChunk(dPoint, oldWeight, i, k);
         }
         return (1.0 / batchIndices.length) * sum;
     }
 
     private double innerChunk(Point point, double[] oldWeight, int i, int k) {
         double errorSum = 0.0;
-        for (int j = 0; j < point.getInputs().length; j++) {
-            errorSum += oldWeight[j] * point.getInputs()[j];
+        for (int j = 0; j < point.getAugmented().length; j++) {
+            errorSum += oldWeight[j] * point.getAugmented()[j];
         }
         return point.getOutput() - errorSum;
     }
@@ -157,7 +197,13 @@ class Driver {
             // Split full data set into k folds
             foldSize = dataPoints.size() / kFolds + (dataPoints.size() % kFolds);
         }
+        else {
+            sBuilder.append("\nSkipping cross-validation.\n");
+        }
+        
         for (int degree = minPolyDegree; degree <= maxPolyDegree; degree++) {
+            sBuilder.append("----------------------------------\n");
+            sBuilder.append(String.format("* Using model of degree %d\n", degree));
             if (kFolds > 1) {
                 double[] validationError = new double[kFolds];
                 double totalError = 0.0;
@@ -171,7 +217,7 @@ class Driver {
                     // Copy to array and fit.
                     Point[] tSetArray = new Point[trainingSet.size()];
                     trainingSet.toArray(tSetArray);
-                    double[] fittedModel = miniBatchGradientDescent(tSetArray);
+                    double[] fittedModel = miniBatchGradientDescent(tSetArray, degree);
 
                     // Report training error.
                     double trainingError = calcError(tSetArray, fittedModel);
@@ -186,26 +232,49 @@ class Driver {
                 double avgLoss = totalError / kFolds;
             }
             else {
+                sBuilder.append(String.format("  * Training on all data (%d examples):\n", dataPoints.size()));
+
                 // Fit a polynomial of degree d to all data and report training error.
                 Point[] dpArray = new Point[dataPoints.size()];
                 dataPoints.toArray(dpArray);
-                double[] fittedModel = miniBatchGradientDescent(dpArray);
+                double[] fittedModel = miniBatchGradientDescent(dpArray, degree);
+
+                if (verbosity > 1) {
+                    sBuilder.append("        Model: Y = ");
+                    for (int i = 0; i < fittedModel.length; i++) {
+                        sBuilder.append(String.format("%.4f", fittedModel[i]));
+                        if (i == 1) {
+                            sBuilder.append(" X1");
+                        }
+                        else if (i > 1) {
+                            sBuilder.append(String.format(" X1^%d", i));
+                        }
+    
+                        if (i + 1 < fittedModel.length) {
+                            sBuilder.append(" + ");
+                        }
+                    }
+                    sBuilder.append("\n");
+                }
+
                 double trainingError = calcError(dpArray, fittedModel);
+                sBuilder.append(String.format("  * Training error:        %f\n\n", trainingError));
             }
         }
+        System.out.println(sBuilder.toString());
     }
 
     private double calcError(Point[] set, double[] model) {
         double error = 0.0;
         for (int i = 0; i < set.length; i++) {
             Point p = set[i];
-            error += Math.pow(p.getOutput() - calcPredicted(model, p.getInputs()) , 2);
+            error += Math.pow(p.getOutput() - calcPredicted(model, p.getAugmented()) , 2);
         }
         return error / set.length;
     }
 
     private double calcPredicted(double[] hypo, double[] input) {
-        double res = 1;     // Augmented Data???
+        double res = 0;
         for (int i = 0; i < input.length; i++) {
             res += hypo[i] * input[i];
         }

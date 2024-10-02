@@ -1,6 +1,8 @@
 public class Point {
     private double[] inputs;
+    private double[] augmented;
     private double output;
+    private int augmentedDegree = -1;
     
     public Point(String[] data) {
         output = Double.parseDouble(data[data.length - 1]);
@@ -11,28 +13,42 @@ public class Point {
         }
     }
 
-    public double[] augment(int degree) {
-        double[] result = new double[(inputs.length * 2) + 1];
+    // public Point(double[] inputs, double output) {
+    //     this.inputs = inputs;
+    //     this.output = output;
+    // }
 
-        // place 1 at index 0
-        result[0] = 1;
+    public void augment(int degree) {
+        double[] result = new double[(inputs.length * degree) + 1];
 
-        // Copy original array, placing start at index 1
-        System.arraycopy(inputs, 0, result, 1, inputs.length);
-
-        // Fill array with inputs, raised to the specified degree
-        for (int i = inputs.length + 1; i < result.length; i++) {
-            result[i] = Math.pow(inputs[i - inputs.length - 1], degree);
+        if (this.augmentedDegree == -1) {
+            // place 1 at index 0
+            result[0] = 1;
+    
+            // Copy original array, placing start at index 1
+            System.arraycopy(inputs, 0, result, 1, inputs.length);
+            this.augmentedDegree = 1;
+        }
+        else {
+            System.arraycopy(augmented, 0, result, 0, augmented.length);
         }
 
-        return result;
+        // Fill array with inputs, raised to the specified degree
+        for (int deg = augmentedDegree + 1; deg <= degree; deg++) {
+            for (int i = 0; i < inputs.length; i++) {
+                result[deg * inputs.length + i] = Math.pow(inputs[i], deg);
+            }
+        }
+
+        this.augmentedDegree = degree;
+        this.augmented = result;
     }
 
     /**
      * @return Double[] return the inputs
      */
-    public double[] getInputs() {
-        return inputs;
+    public double[] getAugmented() {
+        return augmented;
     }
 
     // /**
