@@ -96,7 +96,13 @@ class Driver {
             sBuilder.append(String.format("        (alpha=%f, epochLimit=%d, batchSize=%d)\n", learningRate, epochLimit, batchSize));
         }
         if (verbosity > 2) {
-            sBuilder.append(String.format("        Initial model with zero weights   : Cost = %9.9f\n", calcError(data, weights.get(0)) / numberOfBatches));
+            sBuilder.append(String.format("        Initial model with zero weights   : Cost = %9.9f", calcError(data, weights.get(0)) / numberOfBatches));
+            if (verbosity > 3) {
+                printModel(weights.get(t));
+            }
+            else {
+                sBuilder.append("\n");
+            }
         }
         
         long startTime = System.currentTimeMillis();
@@ -132,13 +138,25 @@ class Driver {
             lastCost = currentCost;
             currentCost = calcError(data, weights.get(t-1)) / numberOfBatches;
             if (verbosity > 2 && e > 0 && e % 1000 == 0) {
-                sBuilder.append(String.format("        After %d epochs ( %d iter.): Cost = %.9f\n", e, t, currentCost));
+                sBuilder.append(String.format("        After %d epochs ( %d iter.): Cost = %.9f", e, t, currentCost));
+                if (verbosity > 3) {
+                    printModel(weights.get(t));
+                }
+                else {
+                    sBuilder.append("\n");
+                }
             }
             e++;
         }
         
         if (verbosity > 2) {
-            sBuilder.append(String.format("        After %d epochs ( %d iter.): Cost = %.9f\n", e, t, currentCost));
+            sBuilder.append(String.format("        After %d epochs ( %d iter.): Cost = %.9f", e, t, currentCost));
+            if (verbosity > 3) {
+                printModel(weights.get(t));
+            }
+            else {
+                sBuilder.append("\n");
+            }
         }
         if (verbosity > 1) {
             long totalTime = System.currentTimeMillis() - startTime;
@@ -240,21 +258,7 @@ class Driver {
                 double[] fittedModel = miniBatchGradientDescent(dpArray, degree);
 
                 if (verbosity > 1) {
-                    sBuilder.append("        Model: Y = ");
-                    for (int i = 0; i < fittedModel.length; i++) {
-                        sBuilder.append(String.format("%.4f", fittedModel[i]));
-                        if (i == 1) {
-                            sBuilder.append(" X1");
-                        }
-                        else if (i > 1) {
-                            sBuilder.append(String.format(" X1^%d", i));
-                        }
-    
-                        if (i + 1 < fittedModel.length) {
-                            sBuilder.append(" + ");
-                        }
-                    }
-                    sBuilder.append("\n");
+                    printModel(fittedModel);
                 }
 
                 double trainingError = calcError(dpArray, fittedModel);
@@ -279,6 +283,24 @@ class Driver {
             res += hypo[i] * input[i];
         }
         return res;
+    }
+
+    private void printModel(double[] model) {
+        sBuilder.append("        Model: Y = ");
+        for (int i = 0; i < model.length; i++) {
+            sBuilder.append(String.format("%.4f", model[i]));
+            if (i == 1) {
+                sBuilder.append(" X1");
+            }
+            else if (i > 1) {
+                sBuilder.append(String.format(" X1^%d", i));
+            }
+
+            if (i + 1 < model.length) {
+                sBuilder.append(" + ");
+            }
+        }
+        sBuilder.append("\n");
     }
 
     public static void main(String[] args) {
