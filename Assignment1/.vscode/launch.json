@@ -16,7 +16,7 @@
             "request": "launch",
             "mainClass": "Driver",
             "projectName": "Assignment1_a2ab1653",
-            "args": "-f a01-data/sample-p5-d3.txt -k 3"
+            "args": "-f a01-data/basic-test.txt -k 3"
         }
     ]
 }

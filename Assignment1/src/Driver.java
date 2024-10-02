@@ -83,10 +83,12 @@ class Driver {
         ArrayList<double[]> weights = new ArrayList<>();
         weights.add(0, new double[numOfAttrs]);
         
+        double currentCost = 0.0;
+        double lastCost = 0.0;
         int numberOfBatches = batchSize <= 0 ? 1 : data.length / batchSize;
         int t = 0;
         int e = 0;
-        while (e <= epochLimit) {
+        while (e <= epochLimit && currentCost > Math.pow(10, -10) && Math.abs(lastCost - currentCost) > Math.pow(10, -10)) {
             ArrayList<int[]> batchIndices = createBatches(data, numberOfBatches);
 
             // For each batch
@@ -101,6 +103,8 @@ class Driver {
                 weights.add(t + 1, newWeight);
                 t++;
             }
+            lastCost = currentCost;
+            currentCost = calcError(data, weights.get(t-1)) / numberOfBatches;
             e++;
         }
         return weights.get(t);
@@ -155,34 +159,57 @@ class Driver {
         }
         for (int degree = minPolyDegree; degree <= maxPolyDegree; degree++) {
             if (kFolds > 1) {
+                double[] validationError = new double[kFolds];
+                double totalError = 0.0;
                 for (int currentFold = 0; currentFold < kFolds; currentFold++) {
                     // Remove data that is in current fold.
-                    ArrayList<Point> copy = new ArrayList<>(dataPoints);
-                    copy.subList(currentFold * foldSize, (currentFold * foldSize + foldSize > copy.size() ? copy.size() : currentFold * foldSize + foldSize)).clear();
+                    ArrayList<Point> trainingSet = new ArrayList<>(dataPoints);
+                    List<Point> x = trainingSet.subList(currentFold * foldSize, (currentFold * foldSize + foldSize > trainingSet.size() ? trainingSet.size() : currentFold * foldSize + foldSize));
+                    ArrayList<Point> validationSet = new ArrayList<>(x);
+                    x.clear();
 
                     // Copy to array and fit.
-                    Point[] dpArray = new Point[copy.size()];
-                    copy.toArray(dpArray);
-                    double[] fittedModel = miniBatchGradientDescent(dpArray);
+                    Point[] tSetArray = new Point[trainingSet.size()];
+                    trainingSet.toArray(tSetArray);
+                    double[] fittedModel = miniBatchGradientDescent(tSetArray);
 
-                    System.out.print("[");
-                    for (double d : fittedModel) {
-                        System.out.print(d+ ", ");
-                    }
-                    System.out.println("]");
+                    // Report training error.
+                    double trainingError = calcError(tSetArray, fittedModel);
 
-                    // TODO: Estimate validation error of fitted model on CURRENTFOLD.
+                    // Estimate validation error of fitted model on validationSet.
+                    Point[] vSetArray = new Point[validationSet.size()];
+                    validationSet.toArray(vSetArray);
+                    validationError[currentFold] = calcError(vSetArray, fittedModel);
+                    totalError += validationError[currentFold];
                 }
+                // Compute average validation error across the folds
+                double avgLoss = totalError / kFolds;
             }
             else {
-                // TODO: Fit a polynomial of degree d to all data and report training error.
-                // Copy to array and fit.
+                // Fit a polynomial of degree d to all data and report training error.
                 Point[] dpArray = new Point[dataPoints.size()];
                 dataPoints.toArray(dpArray);
                 double[] fittedModel = miniBatchGradientDescent(dpArray);
-
+                double trainingError = calcError(dpArray, fittedModel);
             }
         }
+    }
+
+    private double calcError(Point[] set, double[] model) {
+        double error = 0.0;
+        for (int i = 0; i < set.length; i++) {
+            Point p = set[i];
+            error += Math.pow(p.getOutput() - calcPredicted(model, p.getInputs()) , 2);
+        }
+        return error / set.length;
+    }
+
+    private double calcPredicted(double[] hypo, double[] input) {
+        double res = 1;     // Augmented Data???
+        for (int i = 0; i < input.length; i++) {
+            res += hypo[i] * input[i];
+        }
+        return res;
     }
 
     public static void main(String[] args) {
