@@ -36,7 +36,8 @@ public class Point {
         // Fill array with inputs, raised to the specified degree
         for (int deg = augmentedDegree + 1; deg <= degree; deg++) {
             for (int i = 0; i < inputs.length; i++) {
-                result[deg * inputs.length + i] = Math.pow(inputs[i], deg);
+                int index = (deg - 1) * inputs.length + i + 1;
+                result[index] = Math.pow(inputs[i], deg);
             }
         }
 

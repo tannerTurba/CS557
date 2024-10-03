@@ -135,9 +135,10 @@ class Driver {
                 weights.add(t + 1, newWeight);
                 t++;
             }
+            e++;
             lastCost = currentCost;
             currentCost = calcError(data, weights.get(t-1)) / numberOfBatches;
-            if (verbosity > 2 && e > 0 && e % 1000 == 0) {
+            if ((verbosity > 2 && e > 0 && e % 1000 == 0) || verbosity > 4) {
                 sBuilder.append(String.format("        After %d epochs ( %d iter.): Cost = %.9f", e, t, currentCost));
                 if (verbosity > 3) {
                     printModel(weights.get(t));
@@ -146,7 +147,6 @@ class Driver {
                     sBuilder.append("\n");
                 }
             }
-            e++;
         }
         
         if (verbosity > 2) {
@@ -205,17 +205,22 @@ class Driver {
         return batchIndices;
     }
 
+    private ArrayList<Point> getFold(ArrayList<Point> data, int fold) {
+        ArrayList<Point> result = new ArrayList<>();
+        
+        // Loop from back to end so indexes aren't affected when removing elements
+        for (int i = data.size() + fold - kFolds; i >= 0; i -= kFolds) {
+            result.add(data.remove(i));
+        }
+        return result;
+    }
+
     public void regression(ArrayList<Point> dataPoints) {
         if (maxPolyDegree == -1) {
             maxPolyDegree = minPolyDegree;
         }
 
-        int foldSize = 0;
-        if (kFolds > 1) {
-            // Split full data set into k folds
-            foldSize = dataPoints.size() / kFolds + (dataPoints.size() % kFolds);
-        }
-        else {
+        if (kFolds <= 1) {
             sBuilder.append("\nSkipping cross-validation.\n");
         }
         
@@ -223,31 +228,38 @@ class Driver {
             sBuilder.append("----------------------------------\n");
             sBuilder.append(String.format("* Using model of degree %d\n", degree));
             if (kFolds > 1) {
-                double[] validationError = new double[kFolds];
-                double totalError = 0.0;
+                double totalValError = 0.0;
+                double totalTrainError = 0.0;
                 for (int currentFold = 0; currentFold < kFolds; currentFold++) {
                     // Remove data that is in current fold.
                     ArrayList<Point> trainingSet = new ArrayList<>(dataPoints);
-                    List<Point> x = trainingSet.subList(currentFold * foldSize, (currentFold * foldSize + foldSize > trainingSet.size() ? trainingSet.size() : currentFold * foldSize + foldSize));
+                    ArrayList<Point> x = getFold(trainingSet, currentFold);
                     ArrayList<Point> validationSet = new ArrayList<>(x);
                     x.clear();
-
+                    
                     // Copy to array and fit.
+                    sBuilder.append(String.format("  * Training on all data except Fold %d (%d examples)\n", currentFold + 1, trainingSet.size()));
                     Point[] tSetArray = new Point[trainingSet.size()];
                     trainingSet.toArray(tSetArray);
                     double[] fittedModel = miniBatchGradientDescent(tSetArray, degree);
-
+                    
                     // Report training error.
                     double trainingError = calcError(tSetArray, fittedModel);
-
-                    // Estimate validation error of fitted model on validationSet.
+                    totalTrainError += trainingError;
+                    
+                    // Estimate validation error of fitted model on augmented validationSet.
+                    for (Point point : validationSet) {
+                        point.augment(degree);
+                    }
                     Point[] vSetArray = new Point[validationSet.size()];
                     validationSet.toArray(vSetArray);
-                    validationError[currentFold] = calcError(vSetArray, fittedModel);
-                    totalError += validationError[currentFold];
+                    double validationError = calcError(vSetArray, fittedModel);
+                    totalValError += validationError;
+                    
+                    sBuilder.append(String.format("  * Training and validation errors:     %.6f     %.6f\n\n", trainingError, validationError));
                 }
                 // Compute average validation error across the folds
-                double avgLoss = totalError / kFolds;
+                sBuilder.append(String.format("  * Average errors across the folds:    %.6f     %.6f\n", totalTrainError/kFolds, totalValError/kFolds));
             }
             else {
                 sBuilder.append(String.format("  * Training on all data (%d examples):\n", dataPoints.size()));
