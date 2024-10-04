@@ -13,11 +13,6 @@ public class Point {
         }
     }
 
-    // public Point(double[] inputs, double output) {
-    //     this.inputs = inputs;
-    //     this.output = output;
-    // }
-
     public void augment(int degree) {
         double[] result = new double[(inputs.length * degree) + 1];
 
@@ -30,6 +25,7 @@ public class Point {
             this.augmentedDegree = 1;
         }
         else {
+            // Copy array into extended array
             System.arraycopy(augmented, 0, result, 0, augmented.length);
         }
 
@@ -46,46 +42,23 @@ public class Point {
     }
 
     /**
-     * @return Double[] return the inputs
+     * @return Double[] return the augmented inputs
      */
     public double[] getAugmented() {
         return augmented;
     }
 
-    // /**
-    //  * @param inputs the inputs to set
-    //  */
-    // public void setInputs(double[] inputs) {
-    //     this.inputs = inputs;
-    // }
+    /**
+     * @return Double[] return the inputs
+     */
+    public double[] getInputs() {
+        return inputs;
+    }
 
     /**
      * @return Double return the output
      */
     public double getOutput() {
         return output;
-    }
-
-    // /**
-    //  * @param output the output to set
-    //  */
-    // public void setOutput(double output) {
-    //     this.output = output;
-    // }
-
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("\nInputs: [");
-        for (int i = 0; i < inputs.length; i++) {
-            sb.append(inputs[i]);
-
-            if (i+1 < inputs.length) {
-                sb.append(", ");
-            }
-        }
-        sb.append(String.format("]\nOutput: %s\n", output));
-
-        return sb.toString();
     }
 }

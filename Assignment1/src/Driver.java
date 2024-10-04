@@ -14,6 +14,7 @@ class Driver {
     private StringBuilder sBuilder = new StringBuilder();
 
     public Driver(String[] args) {
+        // Sorts through command line args
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
                 case "-f":
@@ -58,37 +59,32 @@ class Driver {
         }
     }
 
+    /**
+     * Getter for the filename.
+     * @return the filename.
+     */
     public String getFileName() {
         return fileName;
     }
 
-    public String toString() {
-        StringBuilder sb = new StringBuilder("\n");
-        sb.append(String.format("fileName: %s\n", fileName));
-        sb.append(String.format("kFolds: %d\n", kFolds));
-        sb.append(String.format("minPolyDegree: %d\n", minPolyDegree));
-        sb.append(String.format("maxPolyDegree: %d\n", maxPolyDegree));
-        sb.append(String.format("learningRate: %f\n", learningRate));
-        sb.append(String.format("epochLimit: %d\n", epochLimit));
-        sb.append(String.format("batchSize: %d\n", batchSize));
-        sb.append(String.format("isRandom: %s\n", isRandom ? "true" : "false"));
-        sb.append(String.format("verbosity: %d\n", verbosity));
-
-        return sb.toString();
-    }
-    
-    private double[] miniBatchGradientDescent(Point[] data, int degree) {
+    /**
+     * Performs mini batch gradient descent on a set of datapoints and to the specified degree.
+     * @param data the dataset
+     * @param degree the degree 
+     * @return the weights of a model. 
+     */
+    private double[] miniBatchGradientDescent(ArrayList<Point> data, int degree) {
         for (Point point : data) {
             point.augment(degree);
         }
         
-        int numOfAttrs = data[0].getAugmented().length;
+        int numOfAttrs = data.get(0).getAugmented().length;
         ArrayList<double[]> weights = new ArrayList<>();
         weights.add(0, new double[numOfAttrs]);
         
         double currentCost = 9999.0;
         double lastCost = 0.0;
-        int numberOfBatches = batchSize <= 0 ? 1 : data.length / batchSize;
+        int numberOfBatches = batchSize <= 0 ? 1 : data.size() / batchSize;
         int t = 0;
         int e = 0;
         if (verbosity > 1) {
@@ -96,9 +92,9 @@ class Driver {
             sBuilder.append(String.format("        (alpha=%f, epochLimit=%d, batchSize=%d)\n", learningRate, epochLimit, batchSize));
         }
         if (verbosity > 2) {
-            sBuilder.append(String.format("        Initial model with zero weights   : Cost = %9.9f", calcError(data, weights.get(0)) / numberOfBatches));
+            sBuilder.append(String.format("        Initial model with zero weights   : Cost = %14.9f", calcError(data, weights.get(0)) / numberOfBatches));
             if (verbosity > 3) {
-                printModel(weights.get(t));
+                printModel(weights.get(t), degree, data.get(0).getInputs().length);
             }
             else {
                 sBuilder.append("\n");
@@ -122,6 +118,9 @@ class Driver {
             }
 
             ArrayList<int[]> batchIndices = createBatches(data, numberOfBatches);
+            if (isRandom) {
+                Collections.shuffle(data);
+            }
 
             // For each batch
             for (int[] indices : batchIndices) {
@@ -139,9 +138,9 @@ class Driver {
             lastCost = currentCost;
             currentCost = calcError(data, weights.get(t-1)) / numberOfBatches;
             if ((verbosity > 2 && e > 0 && e % 1000 == 0) || verbosity > 4) {
-                sBuilder.append(String.format("        After %d epochs ( %d iter.): Cost = %.9f", e, t, currentCost));
+                sBuilder.append(String.format("        After %6d epochs ( %5d iter.): Cost = %14.9f", e, t, currentCost));
                 if (verbosity > 3) {
-                    printModel(weights.get(t));
+                    printModel(weights.get(t), degree, data.get(0).getInputs().length);
                 }
                 else {
                     sBuilder.append("\n");
@@ -150,9 +149,9 @@ class Driver {
         }
         
         if (verbosity > 2) {
-            sBuilder.append(String.format("        After %d epochs ( %d iter.): Cost = %.9f", e, t, currentCost));
+            sBuilder.append(String.format("        After %6d epochs ( %5d iter.): Cost = %14.9f", e, t, currentCost));
             if (verbosity > 3) {
-                printModel(weights.get(t));
+                printModel(weights.get(t), degree, data.get(0).getInputs().length);
             }
             else {
                 sBuilder.append("\n");
@@ -163,21 +162,36 @@ class Driver {
             sBuilder.append("      * Done with fitting!\n");
             sBuilder.append(String.format("        Training took %dms, %d epochs, %d iterations (%.4fms / iteration)\n", totalTime, e, t, 9.0/totalTime));
             sBuilder.append(stopReason);
+            printModel(weights.get(t), degree, data.get(0).getInputs().length);
         }
 
         return weights.get(t);
     }
 
-    private double firstChunk(Point[] data, double[] oldWeight, int[] batchIndices, int k) {
+    /**
+     * Calculates the derivative that will be scaled by the step size. 
+     * @param data the full data set
+     * @param oldWeight the most recent weight being used to calculate the new weight
+     * @param batchIndices the indices of the current batch
+     * @param k the current attribute being inspected.
+     * @return
+     */
+    private double firstChunk(ArrayList<Point> data, double[] oldWeight, int[] batchIndices, int k) {
         double sum = 0.0;
         for (int i : batchIndices) {
-            Point dPoint = data[i];
-            sum += (-2 * dPoint.getAugmented()[k]) * innerChunk(dPoint, oldWeight, i, k);
+            Point dPoint = data.get(i);
+            sum += (-2 * dPoint.getAugmented()[k]) * innerChunk(dPoint, oldWeight);
         }
-        return (1.0 / batchIndices.length) * sum;
+        return (sum / batchIndices.length);
     }
 
-    private double innerChunk(Point point, double[] oldWeight, int i, int k) {
+    /**
+     * Calculates the error in the mini batch gradient descent formula
+     * @param point the point used to calculate the error.
+     * @param oldWeight the most recent weight being used to calculate the new weight.
+     * @return
+     */
+    private double innerChunk(Point point, double[] oldWeight) {
         double errorSum = 0.0;
         for (int j = 0; j < point.getAugmented().length; j++) {
             errorSum += oldWeight[j] * point.getAugmented()[j];
@@ -185,15 +199,21 @@ class Driver {
         return point.getOutput() - errorSum;
     }
 
-    private ArrayList<int[]> createBatches(Point[] data, int numberOfBatches) {
+    /**
+     * Creates batches from the full data set.
+     * @param data the full data set.
+     * @param numberOfBatches the number of batches to create.
+     * @return Sets of indices from each batch, used to index the full data set.
+     */
+    private ArrayList<int[]> createBatches(ArrayList<Point> data, int numberOfBatches) {
         ArrayList<int[]> batchIndices = new ArrayList<>();
         for (int b = 0; b < numberOfBatches; b++) {
             int size = batchSize; 
             if (numberOfBatches == 1) {
-                size = data.length;
+                size = data.size();
             }
-            else if (data.length % batchSize != 0 && b == numberOfBatches - 1) {
-                size = data.length % batchSize;
+            else if (data.size() % batchSize != 0 && b == numberOfBatches - 1) {
+                size = data.size() % batchSize;
             }
 
             int[] indices = new int[size];
@@ -205,6 +225,12 @@ class Driver {
         return batchIndices;
     }
 
+    /**
+     * Retrieves a fold from the specified dataset
+     * @param data the full dataset
+     * @param fold the numbered fold to retrieve
+     * @return
+     */
     private ArrayList<Point> getFold(ArrayList<Point> data, int fold) {
         ArrayList<Point> result = new ArrayList<>();
         
@@ -215,6 +241,10 @@ class Driver {
         return result;
     }
 
+    /**
+     * Performs linear regression on a set of datapoints, which is a labeled set of data.
+     * @param dataPoints a list of labeled data to train on.
+     */
     public void regression(ArrayList<Point> dataPoints) {
         if (maxPolyDegree == -1) {
             maxPolyDegree = minPolyDegree;
@@ -230,6 +260,10 @@ class Driver {
             if (kFolds > 1) {
                 double totalValError = 0.0;
                 double totalTrainError = 0.0;
+                if (isRandom) {
+                    Collections.shuffle(dataPoints);
+                }
+                
                 for (int currentFold = 0; currentFold < kFolds; currentFold++) {
                     // Remove data that is in current fold.
                     ArrayList<Point> trainingSet = new ArrayList<>(dataPoints);
@@ -239,21 +273,17 @@ class Driver {
                     
                     // Copy to array and fit.
                     sBuilder.append(String.format("  * Training on all data except Fold %d (%d examples)\n", currentFold + 1, trainingSet.size()));
-                    Point[] tSetArray = new Point[trainingSet.size()];
-                    trainingSet.toArray(tSetArray);
-                    double[] fittedModel = miniBatchGradientDescent(tSetArray, degree);
+                    double[] fittedModel = miniBatchGradientDescent(trainingSet, degree);
                     
                     // Report training error.
-                    double trainingError = calcError(tSetArray, fittedModel);
+                    double trainingError = calcError(trainingSet, fittedModel);
                     totalTrainError += trainingError;
                     
                     // Estimate validation error of fitted model on augmented validationSet.
                     for (Point point : validationSet) {
                         point.augment(degree);
                     }
-                    Point[] vSetArray = new Point[validationSet.size()];
-                    validationSet.toArray(vSetArray);
-                    double validationError = calcError(vSetArray, fittedModel);
+                    double validationError = calcError(validationSet, fittedModel);
                     totalValError += validationError;
                     
                     sBuilder.append(String.format("  * Training and validation errors:     %.6f     %.6f\n\n", trainingError, validationError));
@@ -265,30 +295,40 @@ class Driver {
                 sBuilder.append(String.format("  * Training on all data (%d examples):\n", dataPoints.size()));
 
                 // Fit a polynomial of degree d to all data and report training error.
-                Point[] dpArray = new Point[dataPoints.size()];
-                dataPoints.toArray(dpArray);
-                double[] fittedModel = miniBatchGradientDescent(dpArray, degree);
+                double[] fittedModel = miniBatchGradientDescent(dataPoints, degree);
 
                 if (verbosity > 1) {
-                    printModel(fittedModel);
+                    printModel(fittedModel, degree, dataPoints.get(0).getInputs().length);
                 }
 
-                double trainingError = calcError(dpArray, fittedModel);
+                double trainingError = calcError(dataPoints, fittedModel);
                 sBuilder.append(String.format("  * Training error:        %f\n\n", trainingError));
             }
         }
         System.out.println(sBuilder.toString());
     }
 
-    private double calcError(Point[] set, double[] model) {
+    /**
+     * Calculates the error from a model based on a training set.
+     * @param set the training set
+     * @param model the model
+     * @return
+     */
+    private double calcError(ArrayList<Point> set, double[] model) {
         double error = 0.0;
-        for (int i = 0; i < set.length; i++) {
-            Point p = set[i];
+        for (int i = 0; i < set.size(); i++) {
+            Point p = set.get(i);
             error += Math.pow(p.getOutput() - calcPredicted(model, p.getAugmented()) , 2);
         }
-        return error / set.length;
+        return error / set.size();
     }
 
+    /**
+     * Calculates the predicted output
+     * @param hypo the weights of the hypothesis function
+     * @param input the inputs from the training set
+     * @return
+     */
     private double calcPredicted(double[] hypo, double[] input) {
         double res = 0;
         for (int i = 0; i < input.length; i++) {
@@ -297,19 +337,40 @@ class Driver {
         return res;
     }
 
-    private void printModel(double[] model) {
+    /**
+     * Converts the model to a string for printing to output.
+     * @param model the model to display
+     * @param degree the highest degree that is used
+     * @param attrCount the number of attributes
+     */
+    private void printModel(double[] model, int degree, int attrCount) {
         sBuilder.append("        Model: Y = ");
+        int attr = 0;
+        int deg = 0;
         for (int i = 0; i < model.length; i++) {
-            sBuilder.append(String.format("%.4f", model[i]));
-            if (i == 1) {
-                sBuilder.append(" X1");
+            sBuilder.append(String.format("%.4f", Math.abs(model[i])));
+
+            if (attr > 0) {
+                sBuilder.append(String.format(" X%d", attr));
             }
-            else if (i > 1) {
-                sBuilder.append(String.format(" X1^%d", i));
+            if (deg > 1) {
+                sBuilder.append(String.format("^%d", deg));
             }
 
             if (i + 1 < model.length) {
-                sBuilder.append(" + ");
+                if (model[i + 1] < 0) {
+                    sBuilder.append(" - ");
+                }
+                else {
+                    sBuilder.append(" + ");
+                }
+            }
+
+            if (attr < attrCount) {
+                attr++;
+            }
+            if (deg < degree) {
+                deg++;
             }
         }
         sBuilder.append("\n");
@@ -347,8 +408,7 @@ class Driver {
             System.err.println("No such file or directory: " + driver.fileName);
         }
 
-        // Point[] dpArray = new Point[dataPoints.size()];
-        // dataPoints.toArray(dpArray);
+        // Perform regression
         driver.regression(dataPoints);
     }
 }
