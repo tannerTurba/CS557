@@ -98,7 +98,7 @@ class Driver {
         if (verbosity > 2) {
             sBuilder.append(String.format("        Initial model with zero weights   : Cost = %9.9f", calcError(data, weights.get(0)) / numberOfBatches));
             if (verbosity > 3) {
-                printModel(weights.get(t));
+                printModel(weights.get(t), degree, data[0].getInputs().length);
             }
             else {
                 sBuilder.append("\n");
@@ -146,7 +146,7 @@ class Driver {
             if ((verbosity > 2 && e > 0 && e % 1000 == 0) || verbosity > 4) {
                 sBuilder.append(String.format("        After %d epochs ( %d iter.): Cost = %.9f", e, t, currentCost));
                 if (verbosity > 3) {
-                    printModel(weights.get(t));
+                    printModel(weights.get(t), degree, data[0].getInputs().length);
                 }
                 else {
                     sBuilder.append("\n");
@@ -157,7 +157,7 @@ class Driver {
         if (verbosity > 2) {
             sBuilder.append(String.format("        After %d epochs ( %d iter.): Cost = %.9f", e, t, currentCost));
             if (verbosity > 3) {
-                printModel(weights.get(t));
+                printModel(weights.get(t), degree, data[0].getInputs().length);
             }
             else {
                 sBuilder.append("\n");
@@ -276,7 +276,7 @@ class Driver {
                 double[] fittedModel = miniBatchGradientDescent(dpArray, degree);
 
                 if (verbosity > 1) {
-                    printModel(fittedModel);
+                    printModel(fittedModel, degree, dataPoints.get(0).getInputs().length);
                 }
 
                 double trainingError = calcError(dpArray, fittedModel);
@@ -303,19 +303,34 @@ class Driver {
         return res;
     }
 
-    private void printModel(double[] model) {
+    private void printModel(double[] model, int degree, int attrCount) {
         sBuilder.append("        Model: Y = ");
+        int attr = 0;
+        int deg = 0;
         for (int i = 0; i < model.length; i++) {
-            sBuilder.append(String.format("%.4f", model[i]));
-            if (i == 1) {
-                sBuilder.append(" X1");
+            sBuilder.append(String.format("%.4f", Math.abs(model[i])));
+
+            if (attr > 0) {
+                sBuilder.append(String.format(" X%d", attr));
             }
-            else if (i > 1) {
-                sBuilder.append(String.format(" X1^%d", i));
+            if (deg > 1) {
+                sBuilder.append(String.format("^%d", deg));
             }
 
             if (i + 1 < model.length) {
-                sBuilder.append(" + ");
+                if (model[i + 1] < 0) {
+                    sBuilder.append(" - ");
+                }
+                else {
+                    sBuilder.append(" + ");
+                }
+            }
+
+            if (attr < attrCount) {
+                attr++;
+            }
+            if (deg < degree) {
+                deg++;
             }
         }
         sBuilder.append("\n");

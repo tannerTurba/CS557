@@ -13,11 +13,6 @@ public class Point {
         }
     }
 
-    // public Point(double[] inputs, double output) {
-    //     this.inputs = inputs;
-    //     this.output = output;
-    // }
-
     public void augment(int degree) {
         double[] result = new double[(inputs.length * degree) + 1];
 
@@ -46,18 +41,18 @@ public class Point {
     }
 
     /**
-     * @return Double[] return the inputs
+     * @return Double[] return the augmented inputs
      */
     public double[] getAugmented() {
         return augmented;
     }
 
-    // /**
-    //  * @param inputs the inputs to set
-    //  */
-    // public void setInputs(double[] inputs) {
-    //     this.inputs = inputs;
-    // }
+    /**
+     * @return Double[] return the inputs
+     */
+    public double[] getInputs() {
+        return inputs;
+    }
 
     /**
      * @return Double return the output
@@ -65,13 +60,6 @@ public class Point {
     public double getOutput() {
         return output;
     }
-
-    // /**
-    //  * @param output the output to set
-    //  */
-    // public void setOutput(double output) {
-    //     this.output = output;
-    // }
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
