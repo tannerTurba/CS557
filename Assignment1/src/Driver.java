@@ -125,12 +125,17 @@ class Driver {
 
             // For each batch
             for (int[] indices : batchIndices) {
+                double[] errors = new double[data.length];
+                for (int i = 0; i < indices.length; i++) {
+                    int index = indices[i];
+                    errors[i] = innerChunk(data[index], weights.get(t));
+                }
                 double[] newWeight = new double[numOfAttrs];
 
                 // For each k in {0, 1, 2, ..., p}
                 for (int k = 0; k < numOfAttrs; k++) {
                     double[] oldWeight = weights.get(t);
-                    newWeight[k] = oldWeight[k] - learningRate * firstChunk(data, oldWeight, indices, k);
+                    newWeight[k] = oldWeight[k] - learningRate * firstChunk(data, oldWeight, indices, k, errors);
                 }
                 weights.add(t + 1, newWeight);
                 t++;
@@ -168,16 +173,17 @@ class Driver {
         return weights.get(t);
     }
 
-    private double firstChunk(Point[] data, double[] oldWeight, int[] batchIndices, int k) {
+    private double firstChunk(Point[] data, double[] oldWeight, int[] batchIndices, int k, double[] errors) {
         double sum = 0.0;
-        for (int i : batchIndices) {
-            Point dPoint = data[i];
-            sum += (-2 * dPoint.getAugmented()[k]) * innerChunk(dPoint, oldWeight, i, k);
+        for (int i = 0; i < batchIndices.length; i++) {
+            int index = batchIndices[i];
+            Point dPoint = data[index];
+            sum += (-2 * dPoint.getAugmented()[k]) * errors[i];
         }
-        return (1.0 / batchIndices.length) * sum;
+        return (sum / batchIndices.length);
     }
 
-    private double innerChunk(Point point, double[] oldWeight, int i, int k) {
+    private double innerChunk(Point point, double[] oldWeight) {
         double errorSum = 0.0;
         for (int j = 0; j < point.getAugmented().length; j++) {
             errorSum += oldWeight[j] * point.getAugmented()[j];
