@@ -1,6 +1,11 @@
 import java.io.*;
 import java.util.*;
 
+/**
+ * Tanner Turba
+ * CS 557 - Machine Learning
+ * The main class used to drive the program. Handles inputs from the command line. 
+ */
 class Driver {
     private String fileName = null;
     private int kFolds = 1;

@@ -1,3 +1,9 @@
+/**
+ * Tanner Turba
+ * CS 557 - Machine Learning
+ * A class used to keep track of point inputs and outputs. Also handles the 
+ * the augmentation of input data. 
+ */
 public class Point {
     private double[] inputs;
     private double[] augmented;
