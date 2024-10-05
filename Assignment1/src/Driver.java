@@ -74,14 +74,17 @@ class Driver {
      * @return the weights of a model. 
      */
     private double[] miniBatchGradientDescent(ArrayList<Point> data, int degree) {
+        // Augment points
         for (Point point : data) {
             point.augment(degree);
         }
         
+        // Init weight
         int numOfAttrs = data.get(0).getAugmented().length;
         ArrayList<double[]> weights = new ArrayList<>();
         weights.add(0, new double[numOfAttrs]);
         
+        // Init vars and some printing
         double currentCost = 9999.0;
         double lastCost = 0.0;
         int numberOfBatches = batchSize <= 0 ? 1 : data.size() / batchSize;
@@ -137,6 +140,8 @@ class Driver {
             e++;
             lastCost = currentCost;
             currentCost = calcError(data, weights.get(t-1)) / numberOfBatches;
+
+            // Printing
             if ((verbosity > 2 && e > 0 && e % 1000 == 0) || verbosity > 4) {
                 sBuilder.append(String.format("        After %6d epochs ( %5d iter.): Cost = %14.9f", e, t, currentCost));
                 if (verbosity > 3) {
@@ -148,6 +153,7 @@ class Driver {
             }
         }
         
+        // Printing
         if (verbosity > 2) {
             sBuilder.append(String.format("        After %6d epochs ( %5d iter.): Cost = %14.9f", e, t, currentCost));
             if (verbosity > 3) {
@@ -165,6 +171,7 @@ class Driver {
             printModel(weights.get(t), degree, data.get(0).getInputs().length);
         }
 
+        // Return best weight
         return weights.get(t);
     }
 
@@ -208,6 +215,7 @@ class Driver {
     private ArrayList<int[]> createBatches(ArrayList<Point> data, int numberOfBatches) {
         ArrayList<int[]> batchIndices = new ArrayList<>();
         for (int b = 0; b < numberOfBatches; b++) {
+            // Determine array sizes.
             int size = batchSize; 
             if (numberOfBatches == 1) {
                 size = data.size();
@@ -216,6 +224,7 @@ class Driver {
                 size = data.size() % batchSize;
             }
 
+            // Load with indices
             int[] indices = new int[size];
             for (int i = 0; i < indices.length; i++) {
                 indices[i] = (b * batchSize) + i;
@@ -246,10 +255,10 @@ class Driver {
      * @param dataPoints a list of labeled data to train on.
      */
     public void regression(ArrayList<Point> dataPoints) {
+        // set max if not specified
         if (maxPolyDegree == -1) {
             maxPolyDegree = minPolyDegree;
         }
-
         if (kFolds <= 1) {
             sBuilder.append("\nSkipping cross-validation.\n");
         }
@@ -297,6 +306,7 @@ class Driver {
                 // Fit a polynomial of degree d to all data and report training error.
                 double[] fittedModel = miniBatchGradientDescent(dataPoints, degree);
 
+                // Output
                 if (verbosity > 1) {
                     printModel(fittedModel, degree, dataPoints.get(0).getInputs().length);
                 }

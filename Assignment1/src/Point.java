@@ -13,6 +13,10 @@ public class Point {
         }
     }
 
+    /**
+     * Augment the point for the specified polynomial degree.
+     * @param degree the polynomial degree.
+     */
     public void augment(int degree) {
         double[] result = new double[(inputs.length * degree) + 1];
 
