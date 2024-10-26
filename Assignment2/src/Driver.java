@@ -13,10 +13,15 @@ public class Driver {
     private boolean shouldPrintTree = false;
     private int splitLimit = -1;
 
-    public Attribute[] attributes;
+    private Attribute[] attributes;
     private Attribute outputClasses;
-    private Point[] points;
+    private ArrayList<Point> points = new ArrayList<>();
+    private ArrayList<Point> trainingSet;
+    private ArrayList<Point> validationSet;
+    private StringBuilder sb = new StringBuilder();
 
+    private Node root;
+    
     public Driver(String[] args) {
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
@@ -85,7 +90,6 @@ public class Driver {
         // Load full data set from file
         try {
             Scanner scanner = new Scanner(new File(filename));
-            ArrayList<Point> points = new ArrayList<>();
             int numOfAttrs = -1;
 
             while (scanner.hasNextLine()) {
@@ -113,9 +117,6 @@ public class Driver {
                     }
                 }
             }
-
-            this.points = new Point[points.size()];
-            points.toArray(this.points);
             scanner.close();
         } 
         catch (FileNotFoundException e) {
@@ -138,19 +139,79 @@ public class Driver {
         return sb.toString();
     }
 
-    public Node decisionTreeLearn() {
-        ArrayList<Point> pointList = new ArrayList<>(Arrays.asList(points));
-        Node root = new Node(pointList, attributes, outputClasses);
-        root.split();
-        return root;
+    public void decisionTreeLearn() {
+        if (isRandomized) {
+            Collections.shuffle(points);
+        }
+        for (int groupSize = trainingGroupSize; groupSize < points.size() && groupSize <= groupSizeLimit; groupSize += groupSizeIncrememnt) {
+            double trainingAccuracy = 0.0;
+            double validationAccuracy = 0.0;
+            int trainingPoints = 0;
+            int validationPoints = 0;
+            
+            if (verbosity >= 1) {
+                sb.append("----------------------------------\n");
+                sb.append(String.format("* Using training groups of size %d\n", groupSize));
+            }
+            
+            for (int trial = 1; trial <= numOfTrials; trial++) {
+                trainingSet = new ArrayList<>(points.subList(0, groupSize));
+                validationSet = new ArrayList<>(points.subList(groupSize, points.size()));
+        
+                root = new Node(trainingSet, attributes, outputClasses);
+                root.split();
+                
+                trainingAccuracy += guess(root, trainingSet);
+                validationAccuracy += guess(root, validationSet);
+                trainingPoints += trainingSet.size();
+                validationPoints += validationSet.size();
+
+                if (verbosity >= 2) {
+                    sb.append(String.format("  * Trial %d:\n", trial));
+                    sb.append(String.format("    Training and validation accuracy:%12.6f%12.6f\n\n", trainingAccuracy / trainingPoints, validationAccuracy / validationPoints));
+                }
+            }
+
+            if (verbosity >= 1) {
+                sb.append(String.format("  * Average accuracy across %d trials:\n", numOfTrials));
+                sb.append(String.format("    Training and validation accuracy:%12.6f%12.6f\n\n", trainingAccuracy / trainingPoints, validationAccuracy / validationPoints));
+            }
+        }
+
+        System.out.println(sb);
+    }
+
+    public char decisionTreePredict(Node node, Point x) {
+        Map<Character, Node> dir = node.getDirectory();
+        if (dir.isEmpty()) {
+            return node.getOutput();
+        }
+
+        int attrIndex = node.getAttrIndex();
+        Node nextNode = dir.get(x.getInputs()[attrIndex]);
+        if (nextNode == null) {
+            // validation error, return best guess
+            return node.getOutput();
+        }
+        return decisionTreePredict(nextNode, x);
+    }
+
+    public double guess(Node n, ArrayList<Point> set) {
+        double correctCount = 0;
+        for (Point point : set) {
+            char result = decisionTreePredict(n, point);
+            if (result == point.getOutput()) {
+                correctCount++;
+            }
+        }
+        return correctCount;
     }
 
     public static void main(String[] args) {
         // Process command-line args
         Driver driver = new Driver(args);
-        System.out.println(driver);
+        driver.decisionTreeLearn();
+        // System.out.println(driver);
 
-        Node tree = driver.decisionTreeLearn();
-        int i = 0;
     }
 }

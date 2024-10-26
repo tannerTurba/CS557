@@ -16,7 +16,7 @@
             "request": "launch",
             "mainClass": "Driver",
             "projectName": "Assignment2_a2ab1654",
-            "args": "-f ex.txt"
+            "args": "-f a02-data/titanic-data.txt -b 100 -t 3 -r -v 2"
         }
     ]
 }

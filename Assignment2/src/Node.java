@@ -7,6 +7,7 @@ public class Node {
     private Map<Character, Node> directory = new HashMap<>();
     private Attribute[] allAttributes;
     private Attribute allOutputs;
+    private int attrIndex = -1;
 
     public Node(ArrayList<Point> data, Attribute[] allAttributes, Attribute allOutputs) {
         this.data = data;
@@ -57,7 +58,14 @@ public class Node {
     }
 
     public void split() {
-        if (outputClasses.size() == 1 || attributes.isEmpty()) {
+        int attrCount = 0;
+        for (Map<Character, Integer> attribute : attributes) {
+            if (attribute != null) {
+                attrCount++;
+            }
+        }
+
+        if (outputClasses.size() == 1 || attrCount == 0) {
             return;
         }
     
@@ -68,17 +76,19 @@ public class Node {
             // construct exs list
             ArrayList<Point> exs = new ArrayList<>();
             for (Point point : data) {
-                if (point.containsInput(i, vals.get(i))) {
+                if (point.containsInput(j, vals.get(i))) {
                     exs.add(point);
                 }
             }
 
             if (!exs.isEmpty()) {
                 ArrayList<Map<Character, Integer>> subset = new ArrayList<>(attributes);
-                subset.remove(j);
+                // subset.remove(j);
+                subset.set(j, null);
                 
-                Node child = new Node(exs, allAttributes, allOutputs, attributes);
+                Node child = new Node(exs, allAttributes, allOutputs, subset);
                 directory.put(vals.get(i), child);
+                attrIndex = j;
                 child.split();
             }
         }
@@ -90,11 +100,13 @@ public class Node {
 
         double gain;
         for (int i = 0; i < attributes.size(); i++) {
-            gain = entropy(outputClasses) - remainingEntropy(i);
-
-            if (gain > bestGain) {
-                bestGain = gain;
-                bestIndex = i;
+            if (attributes.get(i) != null) {
+                gain = entropy(outputClasses) - remainingEntropy(i);
+    
+                if (gain > bestGain) {
+                    bestGain = gain;
+                    bestIndex = i;
+                }
             }
         }
 
@@ -149,5 +161,25 @@ public class Node {
             hS += proportion * (Math.log(proportion) / Math.log(2));
         }
         return hS * -1;
+    }
+
+    public int getAttrIndex() {
+        return attrIndex;
+    }
+
+    public Map<Character, Node> getDirectory() {
+        return directory;
+    }
+
+    // TODO: deterministic or random??
+    public char getOutput() {
+        int count = -1;
+        char result = ' ';
+        for (Map.Entry<Character, Integer> entry : outputClasses.entrySet()) {
+            if (entry.getValue() > count) {
+                result = entry.getKey();
+            }
+        }
+        return result;
     }
 }
