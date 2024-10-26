@@ -7,7 +7,7 @@ public class Driver {
     private int groupSizeIncrememnt = -1;
     private int groupSizeLimit = -1;
     private int numOfTrials = 1;
-    private int maxDepthLimit = -1;
+    private int depthLimit = -1;
     private boolean isRandomized = false;
     private int verbosity = 1;
     private boolean shouldPrintTree = false;
@@ -46,7 +46,7 @@ public class Driver {
                     break;
 
                 case "-d": 
-                    maxDepthLimit = Integer.parseInt(args[++i]);
+                    depthLimit = Integer.parseInt(args[++i]);
                     break;
 
                 case "-r": 
@@ -158,8 +158,8 @@ public class Driver {
                 trainingSet = new ArrayList<>(points.subList(0, groupSize));
                 validationSet = new ArrayList<>(points.subList(groupSize, points.size()));
         
-                root = new Node(trainingSet, attributes, outputClasses);
-                root.split();
+                root = new Node(trainingSet, attributes, outputClasses, verbosity);
+                String output = root.split(0, depthLimit);
                 
                 trainingAccuracy += guess(root, trainingSet);
                 validationAccuracy += guess(root, validationSet);
@@ -168,6 +168,11 @@ public class Driver {
 
                 if (verbosity >= 2) {
                     sb.append(String.format("  * Trial %d:\n", trial));
+                    if (verbosity >= 3) {
+                        sb.append("    * Begining decision tree learning\n");
+                        sb.append(output);
+                        sb.append(String.format("    * Learned tree has %d nodes.\n", Node.getNodeCount()));
+                    }
                     sb.append(String.format("    Training and validation accuracy:%12.6f%12.6f\n\n", trainingAccuracy / trainingPoints, validationAccuracy / validationPoints));
                 }
             }

@@ -8,11 +8,15 @@ public class Node {
     private Attribute[] allAttributes;
     private Attribute allOutputs;
     private int attrIndex = -1;
+    private int verbosity;
+    StringBuilder sb = new StringBuilder();
+    private static int nodeNum = 0;
 
-    public Node(ArrayList<Point> data, Attribute[] allAttributes, Attribute allOutputs) {
+    public Node(ArrayList<Point> data, Attribute[] allAttributes, Attribute allOutputs, int verbosity) {
         this.data = data;
         this.allAttributes = allAttributes;
         this.allOutputs = allOutputs;
+        this.verbosity = verbosity;
         for (int i = 0; i < data.get(0).getInputs().length; i++) {
             this.attributes.add(i, new HashMap<>());
         }
@@ -40,11 +44,12 @@ public class Node {
         }
     }
 
-    public Node(ArrayList<Point> data, Attribute[] allAttributes, Attribute allOutputs, ArrayList<Map<Character, Integer>> containedAttributes) {
+    public Node(ArrayList<Point> data, Attribute[] allAttributes, Attribute allOutputs, ArrayList<Map<Character, Integer>> containedAttributes, int verbosity) {
         this.data = data;
         this.allAttributes = allAttributes;
         this.attributes = containedAttributes;
         this.allOutputs = allOutputs;
+        this.verbosity = verbosity;
 
         for (Point dataPoint : this.data) {
             char oClass = dataPoint.getOutput();
@@ -57,8 +62,10 @@ public class Node {
         }
     }
 
-    public void split() {
+    public String split(int depth, int depthLimit) {
+        sb.append(String.format("      Examining node %d (depth=%d): ", Node.nodeNum, depth));
         int attrCount = 0;
+        Node.nodeNum++;
         for (Map<Character, Integer> attribute : attributes) {
             if (attribute != null) {
                 attrCount++;
@@ -66,7 +73,19 @@ public class Node {
         }
 
         if (outputClasses.size() == 1 || attrCount == 0) {
-            return;
+            sb.append("node is pure\n");
+            return sb.toString();
+        }
+        else if (depth == depthLimit) {
+            sb.append("node is at max depth\n");
+            return sb.toString();
+        }
+        else if (attrCount == 0) {
+            sb.append("node is out of attributes\n");
+            return sb.toString();
+        }
+        else {
+            sb.append("node is splittable\n");
         }
     
         int j = importance();
@@ -86,12 +105,15 @@ public class Node {
                 // subset.remove(j);
                 subset.set(j, null);
                 
-                Node child = new Node(exs, allAttributes, allOutputs, subset);
+                Node child = new Node(exs, allAttributes, allOutputs, subset, verbosity);
                 directory.put(vals.get(i), child);
                 attrIndex = j;
-                child.split();
+
+                String childrenSplits = child.split(depth + 1, depthLimit);
+                sb.append(childrenSplits);
             }
         }
+        return sb.toString();
     }
 
     private int importance() {
@@ -102,6 +124,10 @@ public class Node {
         for (int i = 0; i < attributes.size(); i++) {
             if (attributes.get(i) != null) {
                 gain = entropy(outputClasses) - remainingEntropy(i);
+
+                if (verbosity >= 4) {
+                    sb.append(String.format("        Gain=%.4f with split on [%s]\n", gain, allAttributes[i].getName()));
+                }
     
                 if (gain > bestGain) {
                     bestGain = gain;
@@ -138,24 +164,22 @@ public class Node {
                 }
             }
 
-            remainder += (sv.size() / data.size()) * entropy(classes);
+            // remainder += (entry.getValue() / (double)data.size()) * entropy(classes);
+            remainder += (sv.size() / (double)data.size()) * entropy(classes);
         }
         return remainder;
     }
 
     private double entropy(Map<Character, Integer> outputClasses) {
-        double hS = 0.0;
-        // for (Map.Entry<Character, String> k : allOutputs.getValMap().entrySet()) {
-        //     int kCount = outputClasses.get(k.getKey());
-        //     int setCount = data.size();
-
-        //     double proportion = kCount / (double) setCount;
-        //     hS += proportion * (Math.log(proportion) / Math.log(2));
-        // }
-
+        int setCount = 0;
         for (Map.Entry<Character, Integer> k : outputClasses.entrySet()) {
             int kCount = k.getValue();
-            int setCount = data.size();
+            setCount += kCount;
+        }
+        
+        double hS = 0.0;
+        for (Map.Entry<Character, Integer> k : outputClasses.entrySet()) {
+            int kCount = k.getValue();
 
             double proportion = kCount / (double) setCount;
             hS += proportion * (Math.log(proportion) / Math.log(2));
@@ -181,5 +205,9 @@ public class Node {
             }
         }
         return result;
+    }
+
+    public static int getNodeCount() {
+        return Node.nodeNum;
     }
 }
