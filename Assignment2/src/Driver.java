@@ -144,10 +144,10 @@ public class Driver {
             Collections.shuffle(points);
         }
         for (int groupSize = trainingGroupSize; groupSize < points.size() && groupSize <= groupSizeLimit; groupSize += groupSizeIncrememnt) {
-            double trainingAccuracy = 0.0;
-            double validationAccuracy = 0.0;
-            int trainingPoints = 0;
-            int validationPoints = 0;
+            double trainingEst = 0.0;
+            double validationEst = 0.0;
+            int trainingPts = 0;
+            int validationPts = 0;
             
             if (verbosity >= 1) {
                 sb.append("----------------------------------\n");
@@ -155,16 +155,21 @@ public class Driver {
             }
             
             for (int trial = 1; trial <= numOfTrials; trial++) {
+                double trialTrainingEst = 0.0;
+                double trialValidationEst = 0.0;
+                int trialTrainingPts = 0;
+                int trialValidationPts = 0;
+
                 trainingSet = new ArrayList<>(points.subList(0, groupSize));
                 validationSet = new ArrayList<>(points.subList(groupSize, points.size()));
         
                 root = new Node(trainingSet, attributes, outputClasses, verbosity);
                 String output = root.split(0, depthLimit);
                 
-                trainingAccuracy += guess(root, trainingSet);
-                validationAccuracy += guess(root, validationSet);
-                trainingPoints += trainingSet.size();
-                validationPoints += validationSet.size();
+                trialTrainingEst = guess(root, trainingSet);
+                trialValidationEst = guess(root, validationSet);
+                trialTrainingPts = trainingSet.size();
+                trialValidationPts = validationSet.size();
 
                 if (verbosity >= 2) {
                     sb.append(String.format("  * Trial %d:\n", trial));
@@ -173,17 +178,32 @@ public class Driver {
                         sb.append(output);
                         sb.append(String.format("    * Learned tree has %d nodes.\n", Node.getNodeCount()));
                     }
-                    sb.append(String.format("    Training and validation accuracy:%12.6f%12.6f\n\n", trainingAccuracy / trainingPoints, validationAccuracy / validationPoints));
+                    sb.append(String.format("    Training and validation accuracy:%12.6f%12.6f\n\n", trialTrainingEst / trialTrainingPts, trialValidationEst / trialValidationPts));
                 }
+                trainingEst += trialTrainingEst;
+                validationEst += trialValidationEst;
+                trainingPts += trialTrainingPts;
+                validationPts += trialValidationPts;
             }
 
             if (verbosity >= 1) {
                 sb.append(String.format("  * Average accuracy across %d trials:\n", numOfTrials));
-                sb.append(String.format("    Training and validation accuracy:%12.6f%12.6f\n\n", trainingAccuracy / trainingPoints, validationAccuracy / validationPoints));
+                sb.append(String.format("    Training and validation accuracy:%12.6f%12.6f\n\n", trainingEst / trainingPts, validationEst / validationPts));
             }
         }
 
         System.out.println(sb);
+    }
+
+    public double guess(Node n, ArrayList<Point> set) {
+        double correctCount = 0;
+        for (Point point : set) {
+            char result = decisionTreePredict(n, point);
+            if (result == point.getOutput()) {
+                correctCount++;
+            }
+        }
+        return correctCount;
     }
 
     public char decisionTreePredict(Node node, Point x) {
@@ -200,23 +220,42 @@ public class Driver {
         }
         return decisionTreePredict(nextNode, x);
     }
+    
+    public void printTree() {
+        if (shouldPrintTree) {
+            StringBuilder sb = new StringBuilder("----------------------------------\n");
+            sb.append("* Final decision tree:\n");
+            sb.append(printNode(root, 0, root.getAttrIndex()));
+            System.out.println(sb);
+        }
+    }
 
-    public double guess(Node n, ArrayList<Point> set) {
-        double correctCount = 0;
-        for (Point point : set) {
-            char result = decisionTreePredict(n, point);
-            if (result == point.getOutput()) {
-                correctCount++;
+    private String printNode(Node n, int depth, int attrIndex) {
+        StringBuilder sb = new StringBuilder();
+        
+        if (n.getDirectory().isEmpty()) {
+            // leaf node
+            String output = outputClasses.getValMap().get(n.getOutput());
+            sb.append(String.format("Leaf: Predict [%s]\n", output).indent(depth));
+        }
+        else {
+            // child node
+            String attrName = attributes[n.getAttrIndex()].getName();
+            sb.append(String.format("Node: Split on [%s]\n", attrName).indent(depth));
+
+            for (Map.Entry<Character, Node> branch : n.getDirectory().entrySet()) {
+                String branchName = attributes[n.getAttrIndex()].getValMap().get(branch.getKey());
+                sb.append(String.format("Branch [%s]=[%s]\n", attrName, branchName != null ? branchName : branch.getKey()).indent(depth + 2));
+                sb.append(printNode(branch.getValue(), depth + 4, n.getAttrIndex()));
             }
         }
-        return correctCount;
+        return sb.toString();
     }
 
     public static void main(String[] args) {
         // Process command-line args
         Driver driver = new Driver(args);
         driver.decisionTreeLearn();
-        // System.out.println(driver);
-
+        driver.printTree();
     }
 }

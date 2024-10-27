@@ -163,8 +163,6 @@ public class Node {
                     classes.put(oClass, classes.get(oClass) + 1);
                 }
             }
-
-            // remainder += (entry.getValue() / (double)data.size()) * entropy(classes);
             remainder += (sv.size() / (double)data.size()) * entropy(classes);
         }
         return remainder;
