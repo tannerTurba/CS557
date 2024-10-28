@@ -199,6 +199,7 @@ public class Node {
         char result = ' ';
         for (Map.Entry<Character, Integer> entry : outputClasses.entrySet()) {
             if (entry.getValue() > count) {
+                count = entry.getValue();
                 result = entry.getKey();
             }
         }
