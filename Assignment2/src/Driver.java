@@ -163,8 +163,14 @@ public class Driver {
                 trainingSet = new ArrayList<>(points.subList(0, groupSize));
                 validationSet = new ArrayList<>(points.subList(groupSize, points.size()));
         
-                root = new Node(trainingSet, attributes, outputClasses, verbosity);
-                String output = root.split(0, depthLimit);
+                root = new Node(trainingSet, attributes, outputClasses, verbosity, 0);
+                String output;
+                if (splitLimit > 0) {
+                    output = root.learn(depthLimit, true, splitLimit);
+                }
+                else {
+                    output = root.learn(depthLimit, false, -1);
+                }
                 
                 trialTrainingEst = guess(root, trainingSet);
                 trialValidationEst = guess(root, validationSet);
