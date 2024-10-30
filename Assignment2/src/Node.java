@@ -5,20 +5,16 @@ public class Node implements Comparable<Node> {
     private ArrayList<Map<Character, Integer>> attributes = new ArrayList<>();
     private Map<Character, Integer> outputClasses = new HashMap<>();
     private Map<Character, Node> directory = new HashMap<>();
-    private Attribute[] allAttributes;
-    private Attribute allOutputs;
-    private int attrIndex = -1;
+    public int attrIndex = -1;
     private int verbosity;
     private double infoGain;
     private int depth;
     StringBuilder sb = new StringBuilder();
     private static int nodeNum = 0;
-    private static PriorityQueue<Node> frontier = new PriorityQueue<>();
+    // private static PriorityQueue<Node> frontier = new PriorityQueue<>();
 
-    public Node(ArrayList<Point> data, Attribute[] allAttributes, Attribute allOutputs, int verbosity, int depth) {
+    public Node(ArrayList<Point> data, int verbosity, int depth) {
         this.data = data;
-        this.allAttributes = allAttributes;
-        this.allOutputs = allOutputs;
         this.verbosity = verbosity;
         this.depth = depth;
         for (int i = 0; i < data.get(0).getInputs().length; i++) {
@@ -48,11 +44,9 @@ public class Node implements Comparable<Node> {
         }
     }
 
-    public Node(ArrayList<Point> data, Attribute[] allAttributes, Attribute allOutputs, ArrayList<Map<Character, Integer>> containedAttributes, int verbosity, int depth) {
+    public Node(ArrayList<Point> data, ArrayList<Map<Character, Integer>> containedAttributes, int verbosity, int depth) {
         this.data = data;
-        this.allAttributes = allAttributes;
         this.attributes = containedAttributes;
-        this.allOutputs = allOutputs;
         this.verbosity = verbosity;
         this.depth = depth;
 
@@ -67,7 +61,7 @@ public class Node implements Comparable<Node> {
         }
     }
 
-    private String examine(int depthLimit) {
+    public String examine(int depthLimit, Attribute[] allAttributes) {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("      Examining node %d (depth=%d): ", Node.nodeNum, depth));
         int attrCount = 0;
@@ -97,70 +91,11 @@ public class Node implements Comparable<Node> {
             sb.append("node is splittable\n");
         }
     
-        attrIndex = importance(sb);
+        attrIndex = importance(sb, allAttributes);
         return sb.toString();
     }
 
-    public String split(int depthLimit, boolean splitIsLimited) {
-        int j = attrIndex;
-        ArrayList<Character> vals = new ArrayList<>(allAttributes[j].getValMap().keySet());
-        for (int i = 0; i < vals.size(); i++) {
-            // construct exs list
-            ArrayList<Point> exs = new ArrayList<>();
-            for (Point point : data) {
-                if (point.containsInput(j, vals.get(i))) {
-                    exs.add(point);
-                }
-            }
-
-            if (!exs.isEmpty()) {
-                ArrayList<Map<Character, Integer>> subset = new ArrayList<>(attributes);
-                subset.set(j, null);
-                
-                Node child = new Node(exs, allAttributes, allOutputs, subset, verbosity, depth + 1);
-                directory.put(vals.get(i), child);
-                attrIndex = j;
-
-                if (splitIsLimited) {
-                    child.importance(null);
-                    sb.append(child.examine(depthLimit));
-                    if (child.attrIndex > Integer.MIN_VALUE) {
-                        frontier.add(child);
-                    }
-                }
-                else {
-                    sb.append(child.examine(depthLimit));
-                    if (child.attrIndex > Integer.MIN_VALUE) {
-                        sb.append(child.split(depthLimit, splitIsLimited));
-                    }
-                }
-            }
-        }
-        return sb.toString();
-    }
-
-    public String learn(int depthLimit, boolean splitIsLimited, int splitLimit) {
-        if (splitIsLimited) {
-            frontier.add(this);
-            sb.append(examine(depthLimit));
-            
-            for (int i = 0; i < splitLimit && !frontier.isEmpty(); i++) {
-                Node n = frontier.poll();
-                sb.append(n.split(depthLimit, splitIsLimited));
-            }
-            return sb.toString();
-        }
-        else {
-            sb.append(examine(depthLimit));
-            if (attrIndex == Integer.MIN_VALUE) {
-                return sb.toString();
-            }
-
-            return split(depthLimit, splitIsLimited);
-        }
-    }
-
-    private int importance(StringBuilder sb) {
+    public int importance(StringBuilder sb, Attribute[] allAttributes) {
         double bestGain = -1.0;
         int bestIndex = -1;
 
@@ -229,10 +164,6 @@ public class Node implements Comparable<Node> {
         return hS * -1;
     }
 
-    public int getAttrIndex() {
-        return attrIndex;
-    }
-
     public Map<Character, Node> getDirectory() {
         return directory;
     }
@@ -257,13 +188,21 @@ public class Node implements Comparable<Node> {
         return infoGain;
     }
 
-    // public int getDepth() {
-    //     return depth;
-    // }
+    public ArrayList<Point> getData() {
+        return data;
+    }
 
-    // public void setDepth(int d) {
-    //     depth = d;
-    // }
+    public ArrayList<Map<Character, Integer>> getAttributes() {
+        return attributes;
+    }
+
+    public int getDepth() {
+        return depth;
+    }
+
+    public void addToDirectory(char c, Node child) {
+        directory.put(c, child);
+    }
 
     @Override
     public int compareTo(Node o) {

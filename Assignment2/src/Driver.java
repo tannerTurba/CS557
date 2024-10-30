@@ -21,6 +21,7 @@ public class Driver {
     private StringBuilder sb = new StringBuilder();
 
     private Node root;
+    private PriorityQueue<Node> frontier = new PriorityQueue<>();
     
     public Driver(String[] args) {
         for (int i = 0; i < args.length; i++) {
@@ -163,13 +164,13 @@ public class Driver {
                 trainingSet = new ArrayList<>(points.subList(0, groupSize));
                 validationSet = new ArrayList<>(points.subList(groupSize, points.size()));
         
-                root = new Node(trainingSet, attributes, outputClasses, verbosity, 0);
+                root = new Node(trainingSet, verbosity, 0);
                 String output;
                 if (splitLimit > 0) {
-                    output = root.learn(depthLimit, true, splitLimit);
+                    output = learn(root, depthLimit, true, splitLimit);
                 }
                 else {
-                    output = root.learn(depthLimit, false, -1);
+                    output = learn(root, depthLimit, false, -1);
                 }
                 
                 trialTrainingEst = guess(root, trainingSet);
@@ -218,7 +219,7 @@ public class Driver {
             return node.getOutput();
         }
 
-        int attrIndex = node.getAttrIndex();
+        int attrIndex = node.attrIndex;
         Node nextNode = dir.get(x.getInputs()[attrIndex]);
         if (nextNode == null) {
             // validation error, return best guess
@@ -231,7 +232,7 @@ public class Driver {
         if (shouldPrintTree) {
             StringBuilder sb = new StringBuilder("----------------------------------\n");
             sb.append("* Final decision tree:\n");
-            sb.append(printNode(root, 0, root.getAttrIndex()));
+            sb.append(printNode(root, 0, root.attrIndex));
             System.out.println(sb);
         }
     }
@@ -246,13 +247,72 @@ public class Driver {
         }
         else {
             // child node
-            String attrName = attributes[n.getAttrIndex()].getName();
+            String attrName = attributes[n.attrIndex].getName();
             sb.append(String.format("Node: Split on [%s]\n", attrName).indent(depth));
 
             for (Map.Entry<Character, Node> branch : n.getDirectory().entrySet()) {
-                String branchName = attributes[n.getAttrIndex()].getValMap().get(branch.getKey());
+                String branchName = attributes[n.attrIndex].getValMap().get(branch.getKey());
                 sb.append(String.format("Branch [%s]=[%s]\n", attrName, branchName != null ? branchName : branch.getKey()).indent(depth + 2));
-                sb.append(printNode(branch.getValue(), depth + 4, n.getAttrIndex()));
+                sb.append(printNode(branch.getValue(), depth + 4, n.attrIndex));
+            }
+        }
+        return sb.toString();
+    }
+
+    private String learn(Node node, int depthLimit, boolean splitIsLimited, int splitLimit) {
+        if (splitIsLimited) {
+            frontier.add(node);
+            sb.append(node.examine(depthLimit, attributes));
+            
+            for (int i = 0; i < splitLimit && !frontier.isEmpty(); i++) {
+                Node n = frontier.poll();
+                sb.append(split(n, depthLimit, splitIsLimited));
+            }
+            return sb.toString();
+        }
+        else {
+            sb.append(node.examine(depthLimit, attributes));
+            if (node.attrIndex == Integer.MIN_VALUE) {
+                return sb.toString();
+            }
+
+            return split(node, depthLimit, splitIsLimited);
+        }
+    }
+
+    private String split(Node node, int depthLimit, boolean splitIsLimited) {
+        int j = node.attrIndex;
+        ArrayList<Character> vals = new ArrayList<>(attributes[j].getValMap().keySet());
+        for (int i = 0; i < vals.size(); i++) {
+            // construct exs list
+            ArrayList<Point> exs = new ArrayList<>();
+            for (Point point : node.getData()) {
+                if (point.containsInput(j, vals.get(i))) {
+                    exs.add(point);
+                }
+            }
+
+            if (!exs.isEmpty()) {
+                ArrayList<Map<Character, Integer>> subset = new ArrayList<>(node.getAttributes());
+                subset.set(j, null);
+                
+                Node child = new Node(exs, subset, verbosity, node.getDepth() + 1);
+                node.addToDirectory(vals.get(i), child);
+                node.attrIndex = j;
+
+                if (splitIsLimited) {
+                    child.importance(null, attributes);
+                    sb.append(child.examine(depthLimit, attributes));
+                    if (child.attrIndex > Integer.MIN_VALUE) {
+                        frontier.add(child);
+                    }
+                }
+                else {
+                    sb.append(child.examine(depthLimit, attributes));
+                    if (child.attrIndex > Integer.MIN_VALUE) {
+                        sb.append(split(child, depthLimit, splitIsLimited));
+                    }
+                }
             }
         }
         return sb.toString();
