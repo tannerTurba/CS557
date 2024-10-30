@@ -141,8 +141,9 @@ public class Node implements Comparable<Node> {
 
     public String learn(int depthLimit, boolean splitIsLimited, int splitLimit) {
         if (splitIsLimited) {
+            StringBuilder sb = new StringBuilder();
             frontier.add(this);
-            sb.append(examine(depthLimit));
+            attrIndex = importance(null);
             
             for (int i = 0; i < splitLimit && !frontier.isEmpty(); i++) {
                 Node n = frontier.poll();

@@ -150,7 +150,7 @@ public class Driver {
             int validationPts = 0;
             
             if (verbosity >= 1) {
-                sb.append("----------------------------------\n");
+                sb.append("\n----------------------------------\n");
                 sb.append(String.format("* Using training groups of size %d\n", groupSize));
             }
             
