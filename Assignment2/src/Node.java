@@ -21,7 +21,6 @@ public class Node implements Comparable<Node> {
     private int depth;
     private StringBuilder sb = new StringBuilder();
     private static int nodeNum = 0;
-    private static PriorityQueue<Node> frontier = new PriorityQueue<>();
 
     /**
      * Creates a tree node
@@ -144,7 +143,7 @@ public class Node implements Comparable<Node> {
      * @param splitIsLimited indicates if a split limit is used
      * @return a string for logging purposes
      */
-    public String split(int depthLimit, boolean splitIsLimited) {
+    public String split(int depthLimit, boolean splitIsLimited, PriorityQueue<Node> frontier) {
         // get the values of the attribute being split on
         ArrayList<Character> vals = new ArrayList<>(attributes.get(attrIndex).keySet());
 
@@ -179,7 +178,7 @@ public class Node implements Comparable<Node> {
                     // Using DFP, so split immediately 
                     sb.append(child.examine(depthLimit));
                     if (child.attrIndex > Integer.MIN_VALUE) {
-                        sb.append(child.split(depthLimit, splitIsLimited));
+                        sb.append(child.split(depthLimit, splitIsLimited, frontier));
                     }
                 }
             }
@@ -193,7 +192,7 @@ public class Node implements Comparable<Node> {
      * @param splitLimit the split limit
      * @return a string for logging purposes
      */
-    public String learn(int depthLimit, int splitLimit) {
+    public String learn(int depthLimit, int splitLimit, PriorityQueue<Node> frontier) {
         boolean splitIsLimited = splitLimit > 0;
         if (splitIsLimited) {
             // Use BFS
@@ -205,7 +204,7 @@ public class Node implements Comparable<Node> {
             for (int i = 0; i < splitLimit && !frontier.isEmpty(); i++) {
                 // Get node and split
                 Node n = frontier.poll();
-                sb.append(n.split(depthLimit, splitIsLimited));
+                sb.append(n.split(depthLimit, splitIsLimited, frontier));
             }
             return sb.toString();
         }
@@ -215,7 +214,7 @@ public class Node implements Comparable<Node> {
             if (attrIndex == Integer.MIN_VALUE) {
                 return sb.toString();
             }
-            return split(depthLimit, splitIsLimited);
+            return split(depthLimit, splitIsLimited, frontier);
         }
     }
 

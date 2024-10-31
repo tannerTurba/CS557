@@ -31,6 +31,7 @@ public class Driver {
     private ArrayList<Point> validationSet;
     private StringBuilder sb = new StringBuilder();
     private Node root;
+    private PriorityQueue<Node> frontier = new PriorityQueue<>();
     
     /**
      * Constructor that processes command line args
@@ -196,10 +197,10 @@ public class Driver {
                 root = new Node(trainingSet, attributes, verbosity, 0);
                 String output;
                 if (splitLimit > 0) {
-                    output = root.learn(depthLimit, splitLimit);
+                    output = root.learn(depthLimit, splitLimit, frontier);
                 }
                 else {
-                    output = root.learn(depthLimit, -1);
+                    output = root.learn(depthLimit, -1, null);
                 }
                 
                 // Get training and validation estimates
