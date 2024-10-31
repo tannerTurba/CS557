@@ -1,7 +1,17 @@
 import java.io.*;
 import java.util.*;
 
+/**
+ * Tanner Turba
+ * October 30, 2024
+ * CS 557 - Machine Learning
+ * 
+ * This is the "Driver" for the program because this is where
+ * execution begins and is directed. Also responsible for processing
+ * the command line arguments.
+ */
 public class Driver {
+    // Command line args
     private String filename = null;
     private int trainingGroupSize = 10;
     private int groupSizeIncrememnt = -1;
@@ -13,15 +23,19 @@ public class Driver {
     private boolean shouldPrintTree = false;
     private int splitLimit = -1;
 
+    // Decision tree related attributes
     private Attribute[] attributes;
     private Attribute outputClasses;
     private ArrayList<Point> points = new ArrayList<>();
     private ArrayList<Point> trainingSet;
     private ArrayList<Point> validationSet;
     private StringBuilder sb = new StringBuilder();
-
     private Node root;
     
+    /**
+     * Constructor that processes command line args
+     * @param args command line args
+     */
     public Driver(String[] args) {
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
@@ -78,9 +92,13 @@ public class Driver {
             groupSizeLimit = trainingGroupSize;
         }
 
+        // Read from the supplied file name
         readFile();
     }
 
+    /**
+     * Reads the file from the filename command line argument.
+     */
     private void readFile() {
         if (filename == null) {
             System.err.println("Provide a file path!");
@@ -124,6 +142,10 @@ public class Driver {
         }
     }
 
+    /**
+     * Provides a string representation of the decision tree's 
+     * attributes, output classes, and points.
+     */
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
@@ -139,10 +161,15 @@ public class Driver {
         return sb.toString();
     }
 
+    /**
+     * Learns the supplied data points by generating a decision tree.
+     */
     public void decisionTreeLearn() {
         if (isRandomized) {
             Collections.shuffle(points);
         }
+
+        // For all groupsizes
         for (int groupSize = trainingGroupSize; groupSize < points.size() && groupSize <= groupSizeLimit; groupSize += groupSizeIncrememnt) {
             double trainingEst = 0.0;
             double validationEst = 0.0;
@@ -154,24 +181,28 @@ public class Driver {
                 sb.append(String.format("* Using training groups of size %d\n", groupSize));
             }
             
+            // For each trial of specified group size
             for (int trial = 1; trial <= numOfTrials; trial++) {
                 double trialTrainingEst = 0.0;
                 double trialValidationEst = 0.0;
                 int trialTrainingPts = 0;
                 int trialValidationPts = 0;
 
+                // Create the training set and the validation set with whatever is left over
                 trainingSet = new ArrayList<>(points.subList(0, groupSize));
                 validationSet = new ArrayList<>(points.subList(groupSize, points.size()));
         
-                root = new Node(trainingSet, attributes, outputClasses, verbosity, 0);
+                // Supply all necessary attributes to the root node and learn the data
+                root = new Node(trainingSet, attributes, verbosity, 0);
                 String output;
                 if (splitLimit > 0) {
-                    output = root.learn(depthLimit, true, splitLimit);
+                    output = root.learn(depthLimit, splitLimit);
                 }
                 else {
-                    output = root.learn(depthLimit, false, -1);
+                    output = root.learn(depthLimit, -1);
                 }
                 
+                // Get training and validation estimates
                 trialTrainingEst = guess(root, trainingSet);
                 trialValidationEst = guess(root, validationSet);
                 trialTrainingPts = trainingSet.size();
@@ -186,6 +217,8 @@ public class Driver {
                     }
                     sb.append(String.format("    Training and validation accuracy:%12.6f%12.6f\n\n", trialTrainingEst / trialTrainingPts, trialValidationEst / trialValidationPts));
                 }
+
+                // Sum trial estimates with total estimates
                 trainingEst += trialTrainingEst;
                 validationEst += trialValidationEst;
                 trainingPts += trialTrainingPts;
@@ -197,14 +230,20 @@ public class Driver {
                 sb.append(String.format("    Training and validation accuracy:%12.6f%12.6f\n\n", trainingEst / trainingPts, validationEst / validationPts));
             }
         }
-
         System.out.println(sb);
     }
 
-    public double guess(Node n, ArrayList<Point> set) {
+    /**
+     * Using the supplied tree, guess the output
+     * class for each point in the supplied set.
+     * @param root the root node
+     * @param set the set of data points
+     * @return the rate of successful guesses
+     */
+    public double guess(Node root, ArrayList<Point> set) {
         double correctCount = 0;
         for (Point point : set) {
-            char result = decisionTreePredict(n, point);
+            char result = decisionTreePredict(root, point);
             if (result == point.getOutput()) {
                 correctCount++;
             }
@@ -212,31 +251,48 @@ public class Driver {
         return correctCount;
     }
 
+    /**
+     * Make a prediction for an individual point 
+     * @param node the current node in the tree
+     * @param x the data point
+     * @return the predicted output for the data point
+     */
     public char decisionTreePredict(Node node, Point x) {
         Map<Character, Node> dir = node.getDirectory();
         if (dir.isEmpty()) {
+            // At a leaf node, so return output
             return node.getOutput();
         }
 
         int attrIndex = node.getAttrIndex();
         Node nextNode = dir.get(x.getInputs()[attrIndex]);
         if (nextNode == null) {
-            // validation error, return best guess
+            // No branch for current attr value, return best guess
             return node.getOutput();
         }
+        // Recurse to next node
         return decisionTreePredict(nextNode, x);
     }
     
+    /**
+     * Prints the completed tree
+     */
     public void printTree() {
         if (shouldPrintTree) {
             StringBuilder sb = new StringBuilder("----------------------------------\n");
             sb.append("* Final decision tree:\n");
-            sb.append(printNode(root, 0, root.getAttrIndex()));
+            sb.append(printNode(root, 0));
             System.out.println(sb);
         }
     }
 
-    private String printNode(Node n, int depth, int attrIndex) {
+    /**
+     * Prints the details of a node and recursively prints children nodes
+     * @param n the current node
+     * @param depth the current depth of the node
+     * @return a string representation of the tree
+     */
+    private String printNode(Node n, int depth) {
         StringBuilder sb = new StringBuilder();
         
         if (n.getDirectory().isEmpty()) {
@@ -249,19 +305,24 @@ public class Driver {
             String attrName = attributes[n.getAttrIndex()].getName();
             sb.append(String.format("Node: Split on [%s]\n", attrName).indent(depth));
 
+            // branch data
             for (Map.Entry<Character, Node> branch : n.getDirectory().entrySet()) {
                 String branchName = attributes[n.getAttrIndex()].getValMap().get(branch.getKey());
                 sb.append(String.format("Branch [%s]=[%s]\n", attrName, branchName != null ? branchName : branch.getKey()).indent(depth + 2));
-                sb.append(printNode(branch.getValue(), depth + 4, n.getAttrIndex()));
+                sb.append(printNode(branch.getValue(), depth + 4));
             }
         }
         return sb.toString();
     }
 
     public static void main(String[] args) {
-        // Process command-line args
+        // create instance
         Driver driver = new Driver(args);
+
+        // learn the data by building the decision tree
         driver.decisionTreeLearn();
+
+        // print the tree
         driver.printTree();
     }
 }
