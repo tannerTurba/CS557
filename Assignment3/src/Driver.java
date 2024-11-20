@@ -3,7 +3,7 @@ import java.util.*;
 
 public class Driver {
     private String fileName = "";
-    private int[] layerSizes;
+    private int[] layerSizes = new int[0];
     private double learningRate = 0.01;
     private int epochLimit = 1000;
     private int batchSize = 1;
@@ -14,7 +14,7 @@ public class Driver {
 
     private ArrayList<Point> trainingSet;
     private ArrayList<Point> validationSet;
-    private Layer[] network;
+    private Layer[] network = new Layer[2];
     private Neuron biasNeuron = new Neuron();
 
     public Driver(String[] args) {
@@ -157,15 +157,18 @@ public class Driver {
         return batchIndices;
     }
 
-    private void backPropagate(Point data, int exampleIndex, Layer[] network) {
-        // Forward Propagation
+    private void forwardPropagate(Point data, int exampleIndex, int batchSize) {
         Neuron[] inputLayer = network[0].neurons;
         for (int i = 0; i < inputLayer.length; i++) {
             Neuron j = inputLayer[i];
             double x = data.getAttributes()[i];
 
             if (exampleIndex == 0) {
-                j.a = new double[data.getAttributes().length];
+                j.a = new double[batchSize];
+                biasNeuron.a = new double[batchSize];
+                for (int k = 0; k < batchSize; k++) {
+                    biasNeuron.a[k] = 1.0;
+                }
             }
             j.a[exampleIndex] = x;
         }
@@ -178,19 +181,25 @@ public class Driver {
                 }
                 j.in = inJ;
                 if (exampleIndex == 0) {
-                    j.a = new double[data.getAttributes().length];
+                    j.a = new double[batchSize];
                 }
                 j.a[exampleIndex] = j.g(inJ);
             }
         }
+    }
+
+    private void backPropagate(Point data, int exampleIndex, int batchSize) {
+        // Forward Propagation
+        forwardPropagate(data, exampleIndex, batchSize);
 
         // Back Propagation
         Neuron[] outputLayer = network[network.length - 1].neurons;
-        for (Neuron j : outputLayer) {
+        for (int i = 0; i < outputLayer.length; i++) {
+            Neuron j = outputLayer[i];
             if (exampleIndex == 0) {
-                j.delta = new double[data.getAttributes().length];
+                j.delta = new double[batchSize];
             }
-            j.delta[exampleIndex] = j.gPrime(j.in) * (-2.0 * (data.getOutputClassIndex() == exampleIndex ? 1 : 0 - j.a[exampleIndex]));
+            j.delta[exampleIndex] = j.gPrime(j.in) * (-2.0 * ((data.getOutputClassIndex() == i ? 1 : 0) - j.a[exampleIndex]));
         }
         for (int i = network.length - 2; i >= 2; i--) {
             Layer l = network[i];
@@ -200,21 +209,34 @@ public class Driver {
                     aggregate += jPrime.getKey().delta[exampleIndex] * jPrime.getValue();
                 }
                 if (exampleIndex == 0) {
-                    j.delta = new double[data.getAttributes().length];
+                    j.delta = new double[batchSize];
                 }
                 j.delta[exampleIndex] = j.gPrime(j.in) * aggregate;
             }
         }
     }
 
-    public void neuralNetworkTrain(double[] edgesA) {
+    public void neuralNetworkTrain() {
         int e = 0; 
         int t = 0;
+        double[] estimatedOutputs = new double[trainingSet.get(0).getNumOfClasses()];
         int numberOfBatches = batchSize <= 0 ? 1 : trainingSet.size() / batchSize;
         while (true) {
             if (e >= epochLimit) {
                 return;
             }
+            else {
+                boolean shouldStop = true && e != 0;
+                for (double o : estimatedOutputs) {
+                    if (o > 0.01) {
+                        shouldStop = false;
+                    }
+                }
+                if (shouldStop) {
+                    return;
+                }
+            }
+
             int[][] batchIndices = createBatches(trainingSet, numberOfBatches);
             if (isRandom) {
                 Collections.shuffle(trainingSet);
@@ -223,9 +245,9 @@ public class Driver {
             // For each batch
             for (int[] batch : batchIndices) {
                 // For each example in the batch
-                for (int i : batch) {
-                    Point exampleE = trainingSet.get(i);
-                    backPropagate(exampleE, i, network);
+                for (int i = 0; i < batch.length; i++) {
+                    Point exampleE = trainingSet.get(batch[i]);
+                    backPropagate(exampleE, i, batch.length);
                 }
 
                 // For each edge 
@@ -235,7 +257,7 @@ public class Driver {
                         for (Map.Entry<Neuron, Double> arc : j.getPrecedingNeurons()) {
                             Neuron i = arc.getKey();
                             double summation = 0.0;
-                            for (int exampleIndex : batch) {
+                            for (int exampleIndex = 0; exampleIndex < batch.length; exampleIndex++) {
                                 summation += j.delta[exampleIndex] * i.a[exampleIndex];
                             }
                             summation = summation / batch.length;
@@ -247,14 +269,57 @@ public class Driver {
                     }
                 }
                 t++;
+
+                for (int b = 0; b < batch.length; b++) {
+                    Point exampleE = trainingSet.get(batch[b]);
+                    Layer outputLayer = network[network.length - 1];
+                    for (int k = 0; k < outputLayer.neurons.length; k++) {
+                        Neuron j = outputLayer.neurons[k];
+                        double absError = Math.abs((exampleE.getOutputClassIndex() == k ? 1 : 0) - j.a[b]);
+                        estimatedOutputs[k] = absError;
+                    }
+                }
             }
             e++;
         }
     }
 
+    public void getAccuracy(ArrayList<Point> set) {
+        int counter = 0;
+        for (Point point : set) {
+            forwardPropagate(point, 0, 1);
+
+            double predictedOutput = Double.MIN_VALUE;
+            int predictedClass = -1;
+            Layer outputLayer = network[network.length - 1];
+            for (int i = 0; i < outputLayer.neurons.length; i++) {
+                Neuron n = outputLayer.neurons[i];
+                if (predictedOutput < n.a[0]) {
+                    predictedClass = i;
+                    predictedOutput = n.a[0];
+                }
+            }
+            
+            if (predictedClass == point.getOutputClassIndex()) {
+                counter++;
+            }
+        }
+        System.out.println(counter / (double)set.size());
+        System.out.println(counter);
+        System.out.println(set.size());
+    }
+
+    public void train() {
+        featureScale(trainingSet);
+        initNetwork();
+        neuralNetworkTrain();
+        getAccuracy(trainingSet);
+    }
+
     public static void main(String[] args) {
         Driver driver = new Driver(args);
         driver.readFile();
+        driver.train();
         int i = 0;
     }
 }
