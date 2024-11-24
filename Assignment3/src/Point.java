@@ -4,8 +4,9 @@ public class Point {
     private double[] attributes;
     private int outputClassIndex = -1;
     private int numOfClasses = -1;
+    int index = -1;
 
-    public Point(String line) {
+    public Point(String line, int index) {
         String[] splitLine = line.split("[)] [(]");
         String[] inputs = splitLine[0].replace("(", "").split(" ");
         attributes = new double[inputs.length];
@@ -20,6 +21,7 @@ public class Point {
                 outputClassIndex = i;
             }
         }
+        this.index = index;
     }
 
     public double[] getAttributes() {
@@ -45,10 +47,6 @@ public class Point {
             normalized[i] = -1 + 2 * ((attributes[i] - min) / (max - min));
         }
         attributes = normalized;
-    }
-
-    private void squaredError() {
-
     }
 
     public String toString() {
