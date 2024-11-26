@@ -104,33 +104,44 @@ public class Driver {
         }
     }
 
-    private void featureScale(ArrayList<Point> set) {
-        if (verbosity >= 2) {
+    private void featureScale(ArrayList<Point> set, boolean shouldPrint) {
+        if (shouldPrint && verbosity >= 2) {
             sb.append(String.format("  * min/max values on training set:\n"));
         }
 
-        for (int i = 0; i < set.size(); i++) {
-            Point point = set.get(i);
-            double min = Double.MAX_VALUE;
-            double max = Double.MIN_NORMAL;
-            for (double featureVal : point.getAttributes()) {
-                if (featureVal < min) {
-                    min = featureVal;
-                }
-                if (featureVal > max) {
-                    max = featureVal;
+        if (!set.isEmpty()) {
+            // Init mins and maxs arrays
+            int numOfFeatures = set.get(0).getAttributes().length;
+            double[] mins = new double[numOfFeatures];
+            double[] maxs = new double[numOfFeatures];
+            for (int i = 0; i < numOfFeatures; i++) {
+                mins[i] = Double.MAX_VALUE;
+                maxs[i] = -Double.MAX_VALUE;
+            }
+
+            // Find all mins and maxs per feature
+            for (int i = 0; i < set.size(); i++) {
+                double[] features = set.get(i).getAttributes();
+                for (int k = 0; k < numOfFeatures; k++) {
+                    if (features[k] < mins[k]) {
+                        mins[k] = features[k];
+                    }
+                    if (features[k] > maxs[k]) {
+                        maxs[k] = features[k];
+                    }
                 }
             }
-            point.minMaxNormalize(min, max);
-
-            if (verbosity >= 2) {
-                sb.append(String.format("    Feature %d: %.3f, %.3f\n", i + 1, min, max));
+            
+            // Normalize
+            for (int i = 0; i < numOfFeatures; i++) {
+                if (shouldPrint && verbosity >= 2) {
+                    sb.append(String.format("    Feature %d: %.3f, %.3f\n", i + 1, mins[i], maxs[i]));
+                }   
+                for (Point point : set) {
+                    point.minMaxNormalize(i, mins[i], maxs[i]);
+                }
             }
         }
-    }
-
-    public void scale() {
-        featureScale(trainingSet);
     }
 
     public void initNetwork() {
@@ -138,15 +149,17 @@ public class Driver {
             sb.append("  * Layer sizes (excluding bias neuron(s)):\n");
             sb.append(String.format("    Layer %3d (hidden): %4d\n", 1, trainingSet.get(0).getAttributes().length));
         }
+
         network[0] = new Layer(null, trainingSet.get(0).getAttributes().length, initialWeightVal, biasNeuron);
         for (int i = 0; i < layerSizes.length; i++) {
             network[i + 1] = new Layer(network[i], layerSizes[i], initialWeightVal, biasNeuron);
 
             if (verbosity >= 2) {
-                sb.append(String.format("    Layer %3d (hidden): %4d\n", i + 1, layerSizes[i]));
+                sb.append(String.format("    Layer %3d (hidden): %4d\n", i + 2, layerSizes[i]));
             }
         }
         network[network.length - 1] = new Layer(network[network.length - 2], trainingSet.get(0).getNumOfClasses(), initialWeightVal, biasNeuron);
+
         if (verbosity >= 2) {
             sb.append(String.format("    Layer %3d (hidden): %4d\n", network.length, trainingSet.get(0).getNumOfClasses()));
         }
@@ -187,7 +200,7 @@ public class Driver {
         StringBuilder sbA = new StringBuilder();
         if (verbosity >= 4 && isLogging) {
             sb.append(String.format("    * Forward Propagation on example %d\n", data.index));
-            sb.append(String.format("      Layer %d %s:    %4s:", 1, "(input) ", "a_j"));
+            sb.append(String.format("      Layer %d %s:    %4s: %5.3f", 1, "(input) ", "a_j", biasNeuron.a[exampleIndex]));
         }
         Neuron[] inputLayer = network[0].neurons;
         for (int i = 0; i < inputLayer.length; i++) {
@@ -259,7 +272,7 @@ public class Driver {
         // Back Propagation
         if (verbosity >= 4) {
             sb.append(String.format("    * Backward Propagation on example %d\n", data.index));
-            sb.append(String.format("      Layer %d (output): Delta_j:", network.length - 1));
+            sb.append(String.format("      Layer %d (output): Delta_j:", network.length));
         }
 
         Neuron[] outputLayer = network[network.length - 1].neurons;
@@ -283,9 +296,10 @@ public class Driver {
             Layer l = network[i];
             for (Neuron j : l.neurons) {
                 double aggregate = 0.0;
-                for (Map.Entry<Neuron, Double> jPrime : j.getSucceedingNeurons()) {
+                for (Map.Entry<Neuron, Double> jPrime : j.getSucceedingNeuronSet()) {
                     aggregate += jPrime.getKey().delta[exampleIndex] * jPrime.getValue();
                 }
+
                 if (exampleIndex == 0) {
                     j.delta = new double[batchSize];
                 }
@@ -316,14 +330,22 @@ public class Driver {
         int numberOfBatches = batchSize <= 0 ? 1 : trainingSet.size() / batchSize;
         while (true) {
             if (verbosity >= 3 && e == 0) {
-                double accuracy = getAccuracy(trainingSet);
-                sb.append(String.format("    Initial model with random weights : Cost = %.6f; Loss = %.6f; Acc = %.4f\n", 0.0, 0.0, accuracy));
-            }
-            else if (verbosity >= 3 && e % (epochLimit / 10.0) == 0) {
-                double accuracy = getAccuracy(trainingSet);
-                sb.append(String.format("    After %6d epochs (%6d iter.): Cost = %.6f; Loss = %.6f; Acc = %.4f\n", e, t, 0.0, 0.0, accuracy));
-            }
+                double totalWeights = 0.0;
+                for (int k = 1; k < network.length; k++) {
+                    Layer l = network[k];
+                    for (Neuron j : l.neurons) {
+                        for (Map.Entry<Neuron, Double> arc : j.getPrecedingNeurons()) {
+                            totalWeights += arc.getValue();
+                        }
+                    }
+                }
 
+                double loss = calcLoss(trainingSet);
+                double accuracy = getAccuracy(trainingSet);
+                double cost = loss + (lambda * totalWeights);
+                sb.append(String.format("    Initial model with random weights : Cost = %.6f; Loss = %.6f; Acc = %.4f\n", cost, loss, accuracy));
+            }
+            
             if (e >= epochLimit) {
                 stopCondition = "Epoch Limit";
                 break;
@@ -340,7 +362,8 @@ public class Driver {
                     break;
                 }
             }
-
+            
+            double totalWeights = 0.0;
             int[][] batchIndices = createBatches(trainingSet, numberOfBatches);
             if (isRandom) {
                 Collections.shuffle(trainingSet);
@@ -355,6 +378,7 @@ public class Driver {
                 }
 
                 // For each edge 
+                totalWeights = 0.0;
                 for (int k = 1; k < network.length; k++) {
                     Layer l = network[k];
                     for (Neuron j : l.neurons) {
@@ -363,30 +387,45 @@ public class Driver {
                             double summation = 0.0;
                             for (int exampleIndex = 0; exampleIndex < batch.length; exampleIndex++) {
                                 summation += j.delta[exampleIndex] * i.a[exampleIndex];
+
+                                if (k == network.length - 1) {
+                                    // Record largets absolute error for each training example for stopping condition
+                                    Point exampleE = trainingSet.get(batch[exampleIndex]);
+
+                                    for (int classIndex = 0; classIndex < l.neurons.length; classIndex++) {
+                                        double absError = Math.abs((exampleE.getOutputClassIndex() == classIndex ? 1 : 0) - j.a[exampleIndex]);
+                                        if (absError > estimatedOutputs[classIndex]) {
+                                            estimatedOutputs[classIndex] = absError;
+                                        }
+                                    }
+                                }
                             }
-                            summation = summation / batch.length;
+                            summation = summation / (double)batch.length;
 
                             double weight = arc.getValue();
                             double newWeight = weight - (learningRate * summation) - (2 * learningRate * lambda * weight);
+                            totalWeights += Math.pow(newWeight, 2);
                             arc.setValue(newWeight);
+                            i.getSucceedingNeurons().put(j, newWeight);
                         }
                     }
                 }
                 t++;
-
-                for (int b = 0; b < batch.length; b++) {
-                    Point exampleE = trainingSet.get(batch[b]);
-                    Layer outputLayer = network[network.length - 1];
-                    for (int k = 0; k < outputLayer.neurons.length; k++) {
-                        Neuron j = outputLayer.neurons[k];
-                        double absError = Math.abs((exampleE.getOutputClassIndex() == k ? 1 : 0) - j.a[b]);
-                        if (absError > estimatedOutputs[k]) {
-                            estimatedOutputs[k] = absError;
-                        }
-                    }
-                }
             }
             e++;
+
+            if (verbosity >= 4) {
+                double loss = calcLoss(trainingSet);
+                double accuracy = getAccuracy(trainingSet);
+                double cost = loss + (lambda * totalWeights);
+                sb.append(String.format("    After %6d epochs (%6d iter.): Cost = %.6f; Loss = %.6f; Acc = %.4f\n", e, t, cost, loss, accuracy));
+            }
+            else if (verbosity >= 3 && e % (epochLimit / 10.0) == 0) {
+                double loss = calcLoss(trainingSet);
+                double accuracy = getAccuracy(trainingSet);
+                double cost = loss + (lambda * totalWeights);
+                sb.append(String.format("    After %6d epochs (%6d iter.): Cost = %.6f; Loss = %.6f; Acc = %.4f\n", e, t, cost, loss, accuracy));
+            }
         }
 
         if (verbosity >= 2) {
@@ -420,29 +459,35 @@ public class Driver {
         return counter / (double)set.size();
     }
 
+    private double calcLoss(ArrayList<Point> set) {
+        double loss = 0.0;
+        for (Point point : set) {
+            forwardPropagate(point, 0, 1, false);
+
+            Layer outputLayer = network[network.length - 1];
+            for (int i = 0; i < outputLayer.neurons.length; i++) {
+                Neuron n = outputLayer.neurons[i];
+                loss += Math.pow((point.getOutputClassIndex() == i ? 1 : 0) - n.a[0], 2);
+            }
+        }
+        return loss / set.size();
+    }
+
     public void train() {
         if (verbosity >= 1) {
             sb.append("* Scaling features\n");
-        }
-        featureScale(trainingSet);
-
-        if (verbosity >= 1) {
+            featureScale(trainingSet, true);
+            featureScale(validationSet, false);
+    
             sb.append("* Building network\n");
-        }
-        initNetwork();
-
-        if (verbosity >= 1) {
+            initNetwork();
+    
             sb.append(String.format("* Training network (using %d examples)\n", trainingSet.size()));
-        }
-        neuralNetworkTrain();
+            neuralNetworkTrain();
 
-        if (verbosity >= 1) {
+            double trainingAcc = getAccuracy(trainingSet);
+            double validAcc = getAccuracy(validationSet);
             sb.append("* Evaluating accuracy\n");
-        }
-        double trainingAcc = getAccuracy(trainingSet);
-        double validAcc = getAccuracy(validationSet);
-
-        if (verbosity >= 1) {
             sb.append(String.format("  TrainAcc: %.6f\n", trainingAcc));
             sb.append(String.format("  ValidAcc: %.6f\n", validAcc));
         }

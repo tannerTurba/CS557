@@ -36,17 +36,18 @@ public class Point {
         return numOfClasses;
     }
 
-    public void minMaxNormalize(double min, double max) {
+    public void minMaxNormalize(int index, double min, double max) {
         if (min == max) {
             min = min * -1;
             max = max * -1;
         }
+        attributes[index] =  -1 + 2 * ((attributes[index] - min) / (max - min));
 
-        double[] normalized = new double[attributes.length];
-        for (int i = 0; i < attributes.length; i++) {
-            normalized[i] = -1 + 2 * ((attributes[i] - min) / (max - min));
-        }
-        attributes = normalized;
+        // double[] normalized = new double[attributes.length];
+        // for (int i = 0; i < attributes.length; i++) {
+        //     normalized[i] = -1 + 2 * ((attributes[i] - min) / (max - min));
+        // }
+        // attributes = normalized;
     }
 
     public String toString() {

@@ -41,7 +41,11 @@ public class Neuron {
         succeedingNeurons.put(n, weight);
     }
 
-    public Set<Map.Entry<Neuron, Double>> getSucceedingNeurons() {
+    public Set<Map.Entry<Neuron, Double>> getSucceedingNeuronSet() {
         return succeedingNeurons.entrySet();
+    }
+
+    public Map<Neuron, Double> getSucceedingNeurons() {
+        return succeedingNeurons;
     }
 }
