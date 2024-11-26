@@ -71,7 +71,7 @@ public class Driver {
                     break;
             }
         }
-        biasNeuron = new Neuron(activationFunction);
+        biasNeuron = new Neuron(activationFunction, -1);
     }
 
     public void readFile() {
@@ -198,6 +198,39 @@ public class Driver {
             // batchIndices.add(b, indices);
         }
         return batchIndices;
+    }
+
+    private void load(Point data, int exampleIndex, int batchSize) {
+        Neuron[] inputLayer = network[0].neurons;
+        for (int i = 0; i < inputLayer.length; i++) {
+            Neuron j = inputLayer[i];
+            double x = data.getAttributes()[i];
+
+            if (exampleIndex == 0) {
+                j.a = new double[batchSize];
+                biasNeuron.a = new double[batchSize];
+                for (int k = 0; k < batchSize; k++) {
+                    biasNeuron.a[k] = 1.0;
+                }
+            }
+            j.a[exampleIndex] = x;
+        }
+        for (int i = 1; i < network.length; i++) {
+            Layer l = network[i];
+            for (Neuron j : l.neurons) {
+                double inJ = 0.0;
+                for (Map.Entry<Neuron, Double> precedingNeuron : j.precedingNeurons.entrySet()) {
+                    inJ += precedingNeuron.getKey().a[exampleIndex] * precedingNeuron.getValue();
+                }
+                j.in = inJ;
+
+                if (exampleIndex == 0) {
+                    j.a = new double[batchSize];
+                }
+                double a = j.activationFunction.g(inJ);
+                j.a[exampleIndex] = a;
+            }
+        }
     }
 
     private void forwardPropagate(Point data, int exampleIndex, int batchSize, boolean isLogging) {

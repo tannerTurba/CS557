@@ -7,10 +7,10 @@ public class Layer {
         for (int i = 0; i < numOfNeurons; i++) {
             if (previousLayer == null) {
                 // first layer
-                neurons[i] = new Neuron(function);
+                neurons[i] = new Neuron(function, i + 1);
             }
             else {
-                neurons[i] = new Neuron(previousLayer.neurons, biasNeuron, initialWeight, function);
+                neurons[i] = new Neuron(previousLayer.neurons, biasNeuron, initialWeight, function, i + 1);
             }
         }
     }
