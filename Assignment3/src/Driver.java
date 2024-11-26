@@ -11,11 +11,12 @@ public class Driver {
     private boolean isRandom = false;
     private double initialWeightVal = 0.1;
     private int verbosity = 1;
+    private ActivationFunction activationFunction = ActivationFunction.LOGISTIC;
 
     private ArrayList<Point> trainingSet;
     private ArrayList<Point> validationSet;
     private Layer[] network = new Layer[2];
-    private Neuron biasNeuron = new Neuron();
+    private Neuron biasNeuron;
     private StringBuilder sb = new StringBuilder();
 
     public Driver(String[] args) {
@@ -63,10 +64,14 @@ public class Driver {
                     verbosity = Integer.parseInt(args[++i]);
                     break;
 
+                case "-g":
+                    activationFunction = ActivationFunction.getFunction(args[++i]);
+
                 default:
                     break;
             }
         }
+        biasNeuron = new Neuron(activationFunction);
     }
 
     public void readFile() {
@@ -150,15 +155,15 @@ public class Driver {
             sb.append(String.format("    Layer %3d (hidden): %4d\n", 1, trainingSet.get(0).getAttributes().length));
         }
 
-        network[0] = new Layer(null, trainingSet.get(0).getAttributes().length, initialWeightVal, biasNeuron);
+        network[0] = new Layer(null, trainingSet.get(0).getAttributes().length, initialWeightVal, biasNeuron, activationFunction);
         for (int i = 0; i < layerSizes.length; i++) {
-            network[i + 1] = new Layer(network[i], layerSizes[i], initialWeightVal, biasNeuron);
+            network[i + 1] = new Layer(network[i], layerSizes[i], initialWeightVal, biasNeuron, activationFunction);
 
             if (verbosity >= 2) {
                 sb.append(String.format("    Layer %3d (hidden): %4d\n", i + 2, layerSizes[i]));
             }
         }
-        network[network.length - 1] = new Layer(network[network.length - 2], trainingSet.get(0).getNumOfClasses(), initialWeightVal, biasNeuron);
+        network[network.length - 1] = new Layer(network[network.length - 2], trainingSet.get(0).getNumOfClasses(), initialWeightVal, biasNeuron, ActivationFunction.LOGISTIC);
 
         if (verbosity >= 2) {
             sb.append(String.format("    Layer %3d (hidden): %4d\n", network.length, trainingSet.get(0).getNumOfClasses()));
@@ -228,7 +233,7 @@ public class Driver {
             Layer l = network[i];
             for (Neuron j : l.neurons) {
                 double inJ = 0.0;
-                for (Map.Entry<Neuron, Double> precedingNeuron : j.getPrecedingNeurons()) {
+                for (Map.Entry<Neuron, Double> precedingNeuron : j.precedingNeurons.entrySet()) {
                     inJ += precedingNeuron.getKey().a[exampleIndex] * precedingNeuron.getValue();
                 }
                 j.in = inJ;
@@ -239,7 +244,7 @@ public class Driver {
                 if (exampleIndex == 0) {
                     j.a = new double[batchSize];
                 }
-                double a = j.g(inJ);
+                double a = j.activationFunction.g(inJ);
                 j.a[exampleIndex] = a;
 
                 if (verbosity >= 4 && isLogging) {
@@ -281,7 +286,7 @@ public class Driver {
             if (exampleIndex == 0) {
                 j.delta = new double[batchSize];
             }
-            double delta = j.gPrime(j.in) * (-2.0 * ((data.getOutputClassIndex() == i ? 1 : 0) - j.a[exampleIndex]));
+            double delta = j.activationFunction.gPrime(j.in) * (-2.0 * ((data.getOutputClassIndex() == i ? 1 : 0) - j.a[exampleIndex]));
             j.delta[exampleIndex] = delta;
 
             if (verbosity >= 4) {
@@ -296,14 +301,14 @@ public class Driver {
             Layer l = network[i];
             for (Neuron j : l.neurons) {
                 double aggregate = 0.0;
-                for (Map.Entry<Neuron, Double> jPrime : j.getSucceedingNeuronSet()) {
+                for (Map.Entry<Neuron, Double> jPrime : j.succeedingNeurons.entrySet()) {
                     aggregate += jPrime.getKey().delta[exampleIndex] * jPrime.getValue();
                 }
 
                 if (exampleIndex == 0) {
                     j.delta = new double[batchSize];
                 }
-                double delta = j.gPrime(j.in) * aggregate;
+                double delta = j.activationFunction.gPrime(j.in) * aggregate;
                 j.delta[exampleIndex] = delta;
 
                 if (verbosity >= 4) {
@@ -334,7 +339,7 @@ public class Driver {
                 for (int k = 1; k < network.length; k++) {
                     Layer l = network[k];
                     for (Neuron j : l.neurons) {
-                        for (Map.Entry<Neuron, Double> arc : j.getPrecedingNeurons()) {
+                        for (Map.Entry<Neuron, Double> arc : j.precedingNeurons.entrySet()) {
                             totalWeights += arc.getValue();
                         }
                     }
@@ -382,7 +387,7 @@ public class Driver {
                 for (int k = 1; k < network.length; k++) {
                     Layer l = network[k];
                     for (Neuron j : l.neurons) {
-                        for (Map.Entry<Neuron, Double> arc : j.getPrecedingNeurons()) {
+                        for (Map.Entry<Neuron, Double> arc : j.precedingNeurons.entrySet()) {
                             Neuron i = arc.getKey();
                             double summation = 0.0;
                             for (int exampleIndex = 0; exampleIndex < batch.length; exampleIndex++) {
@@ -406,7 +411,7 @@ public class Driver {
                             double newWeight = weight - (learningRate * summation) - (2 * learningRate * lambda * weight);
                             totalWeights += Math.pow(newWeight, 2);
                             arc.setValue(newWeight);
-                            i.getSucceedingNeurons().put(j, newWeight);
+                            i.succeedingNeurons.put(j, newWeight);
                         }
                     }
                 }
