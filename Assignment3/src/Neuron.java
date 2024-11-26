@@ -5,6 +5,7 @@ public class Neuron {
     Map<Neuron, Double> succeedingNeurons = new HashMap<>();
     ActivationFunction activationFunction;
     double in;
+    double sampleA = 0.0;
     double[] a;
     double[] delta;
     double label = -1;
@@ -12,17 +13,16 @@ public class Neuron {
     public Neuron(Neuron[] precedingNeurons, Neuron biasNeuron, double initialWeight, ActivationFunction function, double label) {
         this.activationFunction = function;
         this.label = label;
-        if (initialWeight >= 0) {
-            this.precedingNeurons.put(biasNeuron, (Math.random() * initialWeight * 2) - initialWeight);
+        double weight = (Math.random() * initialWeight * 2) - initialWeight;
+        if (initialWeight < 0) {
+            weight = 0.1;
         }
-        else {
-            this.precedingNeurons.put(biasNeuron, 0.1);
-        }
+        this.precedingNeurons.put(biasNeuron, weight);
 
         if (precedingNeurons != null) {
             for (Neuron i : precedingNeurons) {
-                double weight = (Math.random() * initialWeight * 2) - initialWeight;
-                if (initialWeight >= 0) {
+                weight = (Math.random() * initialWeight * 2) - initialWeight;
+                if (initialWeight < 0) {
                     weight = 1.0 / (i.label * Math.pow(2, this.label - 1));
                 }
 
