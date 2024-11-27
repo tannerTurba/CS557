@@ -414,7 +414,7 @@ public class Driver {
                                 summation += j.delta[bIndex] * i.a[bIndex];
 
                                 if (k == network.length - 1) {
-                                    // Record largets absolute error for each training example for stopping condition
+                                    // Record largers absolute error for each training example for stopping condition
                                     Point exampleE = trainingSet.get(bIndex);
 
                                     for (int classIndex = 0; classIndex < l.neurons.length; classIndex++) {
@@ -429,9 +429,9 @@ public class Driver {
 
                             double weight = arc.getValue();
                             double newWeight = weight - (learningRate * summation) - (2 * learningRate * lambda * weight);
-                            totalWeights += Math.pow(newWeight, 2);
                             arc.setValue(newWeight);
                             i.succeedingNeurons.put(j, newWeight);
+                            totalWeights += Math.pow(newWeight, 2);
                         }
                     }
                 }
