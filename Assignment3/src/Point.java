@@ -42,12 +42,6 @@ public class Point {
             max = max * -1;
         }
         attributes[index] =  -1 + 2 * ((attributes[index] - min) / (max - min));
-
-        // double[] normalized = new double[attributes.length];
-        // for (int i = 0; i < attributes.length; i++) {
-        //     normalized[i] = -1 + 2 * ((attributes[i] - min) / (max - min));
-        // }
-        // attributes = normalized;
     }
 
     public String toString() {

@@ -200,41 +200,60 @@ public class Driver {
         return batchIndices;
     }
 
-    private void forwardPropagate(Point data, int exampleIndex, boolean isLogging) {
+    private void forwardPropagate(Point data) {
+        biasNeuron.sampleA = 1.0;
+
+        Neuron[] inputLayer = network[0].neurons;
+        for (int i = 0; i < inputLayer.length; i++) {
+            Neuron j = inputLayer[i];
+            double x = data.getAttributes()[i];
+            j.sampleA = x;
+        }
+        for (int i = 1; i < network.length; i++) {
+            Layer l = network[i];
+            for (Neuron j : l.neurons) {
+                double inJ = 0.0;
+                
+                for (Map.Entry<Neuron, Double> precedingNeuron : j.precedingNeurons.entrySet()) {
+                    double a = precedingNeuron.getKey().sampleA;
+                    inJ += a * precedingNeuron.getValue();
+                }
+                j.in = inJ;
+                double a = j.activationFunction.g(inJ);
+                j.sampleA = a;
+            }
+        }
+    }
+
+    private void forwardPropagateTrain(Point data, int exampleIndex, int batchSize) {
+        biasNeuron.a = new double[batchSize];
+        for (int k = 0; k < batchSize; k++) {
+            biasNeuron.a[k] = 1.0;
+        }
+
         StringBuilder sbIN = new StringBuilder();
         StringBuilder sbA = new StringBuilder();
-        if (verbosity >= 4 && isLogging) {
+        if (verbosity >= 4) {
             sb.append(String.format("    * Forward Propagation on example %d\n", data.index));
-            sb.append(String.format("      Layer %d %s:    %4s: %5.3f", 1, "(input) ", "a_j", biasNeuron.a[exampleIndex]));
+            sb.append(String.format("      Layer %d %s:    %4s: %6.3f", 1, "(input) ", "a_j", biasNeuron.a[exampleIndex]));
         }
         Neuron[] inputLayer = network[0].neurons;
         for (int i = 0; i < inputLayer.length; i++) {
             Neuron j = inputLayer[i];
             
-            if (j.a == null) {
-                j.a = new double[trainingSet.size()];
-            }
-            if (biasNeuron.a == null) {
-                biasNeuron.a = new double[trainingSet.size()];
-                for (int k = 0; k < trainingSet.size(); k++) {
-                    biasNeuron.a[k] = 1.0;
-                }
+            if (exampleIndex == 0) {
+                j.a = new double[batchSize];
             }
             
             double x = data.getAttributes()[i];
-            if (isLogging) {
-                j.a[exampleIndex] = x;
-            }
-            else {
-                j.sampleA = x;
-            }
+            j.a[exampleIndex] = x;
 
-            if (verbosity >= 4 && isLogging) {
-                sb.append(String.format(" %5.3f", x));
+            if (verbosity >= 4) {
+                sb.append(String.format(" %6.3f", x));
             }
         }
         for (int i = 1; i < network.length; i++) {
-            if (verbosity >= 4 && isLogging) {
+            if (verbosity >= 4) {
                 sbIN = new StringBuilder(String.format("\n      Layer %d %8s:    %4s:", i + 1, i == network.length - 1 ? "(output)" : "(hidden)", "in_j"));
                 sbA = new StringBuilder("                            a_j:");
             }
@@ -244,38 +263,29 @@ public class Driver {
                 
                 for (Map.Entry<Neuron, Double> precedingNeuron : j.precedingNeurons.entrySet()) {
                     double a = precedingNeuron.getKey().a[exampleIndex];
-                    if (!isLogging) {
-                        a = precedingNeuron.getKey().sampleA;
-                    }
                     inJ += a * precedingNeuron.getValue();
                 }
                 j.in = inJ;
-                if (verbosity >= 4 && isLogging) {
-                    sbIN.append(String.format(" %5.3f", inJ));
+                if (verbosity >= 4) {
+                    sbIN.append(String.format(" %6.3f", inJ));
                 }
 
-                if (j.a == null) {
-                    j.a = new double[trainingSet.size()];
+                if (exampleIndex == 0) {
+                    j.a = new double[batchSize];
                 }
                 double a = j.activationFunction.g(inJ);
+                j.a[exampleIndex] = a;
 
-                if (isLogging) {
-                    j.a[exampleIndex] = a;
-                }
-                else {
-                    j.sampleA = a;
-                }
-
-                if (verbosity >= 4 && isLogging) {
-                    sbA.append(String.format(" %5.3f", a));
+                if (verbosity >= 4) {
+                    sbA.append(String.format(" %6.3f", a));
                 }
             }
-            if (verbosity >= 4 && isLogging) {
+            if (verbosity >= 4) {
                 sb.append(String.format("%s\n%s", sbIN.toString(), sbA.toString()));
             }
         }
 
-        if (verbosity >= 4 && isLogging) {
+        if (verbosity >= 4) {
             sb.append("\n             example's actual y:");
             for (int i = 0; i < data.getNumOfClasses(); i++) {
                 if (i == data.getOutputClassIndex()) {
@@ -289,9 +299,9 @@ public class Driver {
         }
     }
 
-    private void backPropagate(Point data, int exampleIndex) {
+    private void backPropagate(Point data, int exampleIndex, int batchSize) {
         // Forward Propagation
-        forwardPropagate(data, exampleIndex, true);
+        forwardPropagateTrain(data, exampleIndex, batchSize);
 
         // Back Propagation
         if (verbosity >= 4) {
@@ -302,14 +312,14 @@ public class Driver {
         Neuron[] outputLayer = network[network.length - 1].neurons;
         for (int i = 0; i < outputLayer.length; i++) {
             Neuron j = outputLayer[i];
-            if (j.delta == null) {
-                j.delta = new double[trainingSet.size()];
+            if (exampleIndex == 0) {
+                j.delta = new double[batchSize];
             }
             double delta = j.activationFunction.gPrime(j.in) * (-2.0 * ((data.getOutputClassIndex() == i ? 1 : 0) - j.a[exampleIndex]));
             j.delta[exampleIndex] = delta;
 
             if (verbosity >= 4) {
-                sb.append(String.format(" %5.3f", delta));
+                sb.append(String.format(" %6.3f", delta));
             }
         }
         for (int i = network.length - 2; i >= 1; i--) {
@@ -324,14 +334,14 @@ public class Driver {
                     aggregate += jPrime.getKey().delta[exampleIndex] * jPrime.getValue();
                 }
 
-                if (j.delta == null) {
-                    j.delta = new double[trainingSet.size()];
+                if (exampleIndex == 0) {
+                    j.delta = new double[batchSize];
                 }
                 double delta = j.activationFunction.gPrime(j.in) * aggregate;
                 j.delta[exampleIndex] = delta;
 
                 if (verbosity >= 4) {
-                    sb.append(String.format(" %5.3f", delta));
+                    sb.append(String.format(" %6.3f", delta));
                 }
             }
         }
@@ -398,7 +408,7 @@ public class Driver {
                 // For each example in the batch
                 for (int i = 0; i < batch.length; i++) {
                     Point exampleE = trainingSet.get(batch[i]);
-                    backPropagate(exampleE, batch[i]);
+                    backPropagate(exampleE, i, batch.length);
                 }
 
                 // For each edge 
@@ -410,15 +420,14 @@ public class Driver {
                             Neuron i = arc.getKey();
                             double summation = 0.0;
                             for (int exampleIndex = 0; exampleIndex < batch.length; exampleIndex++) {
-                                int bIndex = batch[exampleIndex];
-                                summation += j.delta[bIndex] * i.a[bIndex];
+                                summation += j.delta[exampleIndex] * i.a[exampleIndex];
 
                                 if (k == network.length - 1) {
                                     // Record largers absolute error for each training example for stopping condition
-                                    Point exampleE = trainingSet.get(bIndex);
+                                    Point exampleE = trainingSet.get(exampleIndex);
 
                                     for (int classIndex = 0; classIndex < l.neurons.length; classIndex++) {
-                                        double absError = Math.abs((exampleE.getOutputClassIndex() == classIndex ? 1 : 0) - j.a[bIndex]);
+                                        double absError = Math.abs((exampleE.getOutputClassIndex() == classIndex ? 1 : 0) - j.a[exampleIndex]);
                                         if (absError > estimatedOutputs[classIndex]) {
                                             estimatedOutputs[classIndex] = absError;
                                         }
@@ -464,7 +473,7 @@ public class Driver {
     public double getAccuracy(ArrayList<Point> set) {
         int counter = 0;
         for (Point point : set) {
-            forwardPropagate(point, 0, false);
+            forwardPropagate(point);
 
             double predictedOutput = -Double.MAX_VALUE;
             int predictedClass = -1;
@@ -486,10 +495,10 @@ public class Driver {
 
     private double calcLoss(ArrayList<Point> set) {
         double loss = 0.0;
+        Layer outputLayer = network[network.length - 1];
         for (Point point : set) {
-            forwardPropagate(point, 0, false);
+            forwardPropagate(point);
 
-            Layer outputLayer = network[network.length - 1];
             for (int i = 0; i < outputLayer.neurons.length; i++) {
                 Neuron n = outputLayer.neurons[i];
                 loss += Math.pow((point.getOutputClassIndex() == i ? 1 : 0) - n.sampleA, 2);
