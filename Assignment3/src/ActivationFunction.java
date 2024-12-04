@@ -1,3 +1,11 @@
+/*
+ * Tanner Turba
+ * December 3, 2024
+ * CS 557 - Machine Learning
+ * 
+ * This is the enumeration that supports the extra credit activation function options. 
+ * For each available option, the activation function, g, can be calculated as well as its derivative, g'.
+ */
 public enum ActivationFunction {
     LOGISTIC {
         @Override
@@ -56,6 +64,11 @@ public enum ActivationFunction {
     // Derivative of activation function
     public abstract double gPrime(double inJ);
 
+    /**
+     * Converts a string to its activation function.
+     * @param func
+     * @return
+     */
     public static ActivationFunction getFunction(String func) {
         switch (func.toLowerCase()) {
             case "relu":
