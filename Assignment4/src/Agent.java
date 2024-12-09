@@ -14,36 +14,38 @@ public class Agent {
 
     public void reset() {
         currentCell = grid.getStartingCell();
+        score = 0;
+        isTerminated = false;
     }
 
-    public void move(Action a) {
+    public double move(Action a) {
         if (currentCell.getType() == CellType.CLIFF) {
             // Acting in a cliff -> return to start
             currentCell = grid.getStartingCell();
             score -= 10;
-            return;
+            return -10;
         }
 
         int drift = calcDrift();
         Cell potentialLocation = null;
         switch (a) {
             case UP:
-                System.out.println("moving up");
+                // System.out.println("moving up");
                 potentialLocation = moveUp(grid, currentCell, drift);
                 break;
 
             case DOWN:
-                System.out.println("moving down");
+                // System.out.println("moving down");
                 potentialLocation = moveDown(grid, currentCell, drift);
                 break;
 
             case LEFT:
-                System.out.println("moving left");
+                // System.out.println("moving left");
                 potentialLocation = moveLeft(grid, currentCell, drift);
                 break;
 
             case RIGHT:
-                System.out.println("moving right");
+                // System.out.println("moving right");
                 potentialLocation = moveRight(grid, currentCell, drift);
                 break;
         
@@ -57,6 +59,7 @@ public class Agent {
             if (potentialLocation.getType() == CellType.CLIFF) {
                 // Entering a cliff
                 score -= 20;
+                return -20;
             }
             else if (potentialLocation.getType().isTerminal()) {
                 // no futher action is possible
@@ -65,17 +68,21 @@ public class Agent {
                 if (potentialLocation.getType() == CellType.GOAL) {
                     // Entering a goal cell
                     score += 10;
+                    return 10;
                 }
                 else if (potentialLocation.getType() == CellType.MINE) {
                     // Entering a mine cell
                     score -= 100;
+                    return -100;
                 }
             }
             else {
                 // Any other cell
                 score--;
+                return -1;
             }
         }
+        return 0;
     }
 
     private Cell moveUp(Grid grid, Cell current, int drift) {
@@ -86,15 +93,15 @@ public class Agent {
             Cell result = grid.get(y - 1)[x];
             if (drift < 0) {
                 // Drift left
-                System.out.println("drifting left");
+                // System.out.println("drifting left");
                 return moveLeft(grid, result, 0);
             }
             else if (drift > 0) {
                 // Drift right
-                System.out.println("drifting right");
+                // System.out.println("drifting right");
                 return moveRight(grid, result, 0);
             }
-            System.out.println();
+            // System.out.println();
             return result;
         }
         return null;
@@ -108,15 +115,15 @@ public class Agent {
             Cell result = grid.get(y + 1)[x];
             if (drift < 0) {
                 // Drift left
-                System.out.println("drifting left");
+                // System.out.println("drifting left");
                 return moveLeft(grid, result, 0);
             }
             else if (drift > 0) {
                 // Drive right
-                System.out.println("drifting right");
+                // System.out.println("drifting right");
                 return moveRight(grid, result, 0);
             }
-            System.out.println();
+            // System.out.println();
             return result;
         }
         return null;
@@ -130,15 +137,15 @@ public class Agent {
             Cell result = grid.get(y)[x - 1];
             if (drift < 0) {
                 // Drift down
-                System.out.println("drifting down");
+                // System.out.println("drifting down");
                 return moveDown(grid, result, 0);    
             }
             else if (drift > 0) {
                 // Drift up
-                System.out.println("drifting up");
+                // System.out.println("drifting up");
                 return moveUp(grid, result, 0);
             }
-            System.out.println();
+            // System.out.println();
             return result;
         }
         return null;
@@ -153,15 +160,15 @@ public class Agent {
             Cell result = grid.get(y)[x + 1];
             if (drift < 0) {
                 // Drift down
-                System.out.println("drifting down");
+                // System.out.println("drifting down");
                 return moveDown(grid, result, 0);
             }
             else if (drift > 0) {
                 // Drift up
-                System.out.println("drifting up");
+                // System.out.println("drifting up");
                 return moveUp(grid, result, 0);
             }
-            System.out.println();
+            // System.out.println();
             return result;
         }
         return null;

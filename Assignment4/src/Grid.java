@@ -35,4 +35,23 @@ public class Grid extends ArrayList<Cell[]> {
     public Cell getStartingCell() {
         return startingCell;
     }
+
+    public String printPolicy() {
+        StringBuilder sb = new StringBuilder();
+
+        for (Cell[] row : this) {
+            for (Cell cell : row) {
+                CellType type = cell.getType();
+                if (type.isTerminal() || type.isBlocking()) {
+                    sb.append(type);
+                }
+                else {
+                    sb.append(cell.getGreedyAction());
+                }
+            }
+            sb.append("\n");
+        }
+
+        return sb.toString();
+    }
 }
