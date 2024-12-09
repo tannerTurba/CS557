@@ -3,10 +3,10 @@ import java.util.*;;
 
 public class Driver {
     private String fileName = null;
-    private double learningRate = 0.9;
+    private double alpha = 0.9;
     private double epsilon = 0.9;
     private double discountRate = 0.9;
-    private int learningRateDecay = 1000;
+    private int alphaDecay = 1000;
     private int epsilonDecay = 200;
     private double actionSuccessProbability = 0.8;
     private boolean isQLearning = false;
@@ -14,7 +14,9 @@ public class Driver {
     private boolean isUnicode = false;
     private int verbosity = 1;
 
-    private ArrayList<Cell[]> grid = new ArrayList<>();
+    private Grid grid = null;
+    private Agent agent = null;
+    private int maxActions = 0;
     
     /**
      * Creates a driver instance from the user's input parameters.
@@ -29,7 +31,7 @@ public class Driver {
                     break;
                 
                 case "-a":
-                    learningRate = Double.parseDouble(args[++i]);
+                    alpha = Double.parseDouble(args[++i]);
                     break;
 
                 case "-e":
@@ -41,7 +43,7 @@ public class Driver {
                     break;
 
                 case "-na":
-                    learningRateDecay = Integer.parseInt(args[++i]);
+                    alphaDecay = Integer.parseInt(args[++i]);
                     break;
 
                 case "-ne":
@@ -79,25 +81,14 @@ public class Driver {
         // Load grid from file.
         try {
             Scanner scanner = new Scanner(new File(fileName));
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine().trim().toLowerCase();
-                // Not a comment, so continue
-                if (line.charAt(0) != '#') {
-                    Cell[] row = new Cell[line.length()];
-                    for (int i = 0; i < line.length(); i++) {
-                        char c = line.charAt(i);
-                        if (Character.isAlphabetic(c) || c == '_') {
-                            row[i] = new Cell(c);
-                        }
-                    }
-                    grid.add(row);
-                }
-            }
+            grid = new Grid(scanner);
             scanner.close();
         } 
         catch (FileNotFoundException e) {
             System.err.println("No such file or directory: " + fileName);
         }
+        maxActions = grid.size() * grid.get(0).length;
+        agent = new Agent(actionSuccessProbability, grid);
     }
 
     public String toString() {
@@ -111,8 +102,41 @@ public class Driver {
         return sb.toString();
     }
 
+    public void play() {
+        agent.move(Action.DOWN);
+        System.out.println(agent.getCurrentCell());
+    }
+
+    public void learn() {
+        double alpha = this.alpha;
+        double epsilon = this.epsilon;
+        for (int t = 0; t < trials; t++) {
+            if (t % alphaDecay == 0) {
+                alpha = this.alpha / 1 + (t / alphaDecay);
+            }
+            if (t % epsilonDecay == 0) {
+                epsilon = this.epsilon / 1 + (t / epsilonDecay);
+            }
+            
+            agent.reset();
+            for (int actionCount = 0; actionCount < maxActions && agent.isTerminated(); actionCount++) {
+                // perform actions based on epsilon-greedy policy.
+    
+                if (isQLearning) {
+                    // update Q values using off-policy/Q-learning updates.
+                }
+                else {
+                    // update Q values using on-policy/SARSA updates.
+                }
+            }
+        }
+    }
+
     public static void main(String[] args) {
         Driver driver = new Driver(args);
         System.out.println(driver);
+
+        driver.play();
+
     }
 }
