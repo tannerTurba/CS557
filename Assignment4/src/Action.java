@@ -1,5 +1,5 @@
 public enum Action {
-    UP, DOWN, LEFT, RIGHT;
+    UP, LEFT, RIGHT, DOWN;
 
     public String toString() {
         switch (this) {

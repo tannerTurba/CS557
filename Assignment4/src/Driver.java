@@ -95,39 +95,38 @@ public class Driver {
     }
 
     public String toString() {
-        // StringBuilder sb = new StringBuilder();
-        // for (Cell[] cells : grid) {
-        //     for (Cell cell : cells) {
-        //         sb.append(cell);
-        //     }
-        //     sb.append("\n");
-        // }
         return sb.toString();
     }
 
-    public double play(boolean isTraining) {
+    public double play(boolean isTraining, boolean midTraining) {
         double alpha = this.alpha;
         double epsilon = this.epsilon;
         int reward = 0;
         int trials = this.trials;
-        if (!isTraining) {
-            trials = 50;
-            sb.append("* Beginning 50 evaluation episodes...\n");
-        }
-        else {
-            String learnType = "SARSA";
-            if (isQLearning) {
-                learnType = "Q-Learning";
+        if (!midTraining) {
+            if (!isTraining) {
+                trials = 50;
+                sb.append("* Beginning 50 evaluation episodes...\n");
             }
-            sb.append(String.format("* Beginning %d learning episodes with %s...\n", trials, learnType));
+            else {
+                String learnType = "SARSA";
+                if (isQLearning) {
+                    learnType = "Q-Learning";
+                }
+                sb.append(String.format("* Beginning %d learning episodes with %s...\n", trials, learnType));
+                if (verbosity >= 3 && midTraining) {
+                    sb.append("  * After     Avg. Total Reward for\n");
+                    sb.append("  * Episode   Current Greedy Policy\n");
+                } 
+            }
         }
 
         for (int t = 0; t < trials; t++) {
             if (t % alphaDecay == 0) {
-                alpha = this.alpha / 1 + (t / alphaDecay);
+                alpha = this.alpha / (1 + (t / alphaDecay));
             }
             if (t % epsilonDecay == 0) {
-                epsilon = this.epsilon / 1 + (t / epsilonDecay);
+                epsilon = this.epsilon / (1 + (t / epsilonDecay));
             }
             
             // Place agent at start.
@@ -163,22 +162,34 @@ public class Driver {
                         policyUpdate = qSPrime.get(aPrime);
                     }
     
-                    double newTempDiff = qS.get(a) + alpha * (r + discountRate * policyUpdate - qS.get(a));
+                    double newTempDiff = qS.get(a) + alpha * (r + (discountRate * policyUpdate) - qS.get(a));
                     qS.put(a, newTempDiff);
                 }
                 s = sPrime;
                 a = aPrime;
             }
+            // System.out.println(grid.printGrid());
             reward += agent.getScore();
+
+            if (verbosity >= 3 && isTraining && t % (trials / 10) == 0) {
+                double rwrd = play(false, true);
+                sb.append(String.format("    %-7d %6.3f\n", t, rwrd));
+                // sb.append(grid.printGrid());
+            }
         }
 
         double avgReward = reward / (double)trials;
-        if (isTraining) {
-            sb.append("  Done with learning!\n");
-        }
-        else {
-            sb.append(String.format("  Avg. Total Reward of Learned Policy: %.3f\n", avgReward));
-            sb.append(String.format("* Learned greedy policy:\n%s", grid.printPolicy()));
+        if (!midTraining) {
+            if (isTraining) {
+                sb.append("  Done with learning!\n");
+            }
+            else {
+                sb.append(String.format("  Avg. Total Reward of Learned Policy: %.3f\n", avgReward));
+                sb.append(String.format("* Learned greedy policy:\n%s", grid.printPolicy()));
+                if (verbosity >= 2) {
+                    sb.append(String.format("* Learned Q values:\n%s", grid.printGrid()));
+                }
+            }
         }
         return avgReward;
     }
@@ -188,7 +199,7 @@ public class Driver {
 
         if (isTraining && Math.random() <= epsilon) {
             // Random action
-            switch ((int)Math.random() * 4) {
+            switch ((int)(Math.random() * 4)) {
                 case 0:
                     return Action.UP;
 
@@ -205,29 +216,17 @@ public class Driver {
         else {
             // Best action
             return currentState.getGreedyAction();
-            // Action bestAction = null;
-            // double bestReward = -Double.MAX_VALUE;
-            
-            // for (Map.Entry<Action, Double> pair : currentState.getQ().entrySet()) {
-            //     if (bestAction == null || bestReward < pair.getValue()) {
-            //         bestAction = pair.getKey();
-            //         bestReward = pair.getValue();
-            //     }
-            // }
-            // return bestAction;
         }
     }
-
-
 
     public static void main(String[] args) {
         Driver driver = new Driver(args);
         
         // Train
-        driver.play(true);
+        driver.play(true, false);
         
         // Evaluate
-        driver.play(false);
+        driver.play(false, false);
         
         System.out.println(driver);
     }

@@ -54,4 +54,41 @@ public class Grid extends ArrayList<Cell[]> {
 
         return sb.toString();
     }
+
+    public String printGrid() {
+        StringBuilder sb = new StringBuilder();
+
+        for (Cell[] row : this) {
+            for (int i = 0; i < row.length; i++) {
+                sb.append("------------");
+            }
+            sb.append("\n");
+
+            for (Action action : Action.values()) {
+                for (Cell cell : row) {
+                    if (action == Action.UP) {
+                        sb.append(String.format("|  %6.1f  ", cell.getQ().get(action)));
+                    }
+                    else if (action == Action.LEFT) {
+                        sb.append(String.format("|%-6.1f    ", cell.getQ().get(action)));
+                    }
+                    else if (action == Action.RIGHT) {
+                        sb.append(String.format("|    %6.1f", cell.getQ().get(action)));
+                    }
+                    else {
+                        sb.append(String.format("|  %6.1f  ", cell.getQ().get(action)));
+                    }
+                    
+                }
+                sb.append("|\n");
+            }
+        }
+
+        for (int i = 0; i < this.get(0).length; i++) {
+            sb.append("------------");
+        }
+        sb.append("\n");
+
+        return sb.toString();
+    }
 }
