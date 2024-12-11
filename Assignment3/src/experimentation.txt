@@ -1,0 +1,972 @@
+Tanners-MBP:Assignment3 tannerturba$ Driver -f a03-data/image-05.dat -v 3 -h 1 128 
+* Reading a03-data/image-05.dat
+* Doing train/validation split
+* Scaling features
+  * min/max values on training set:
+    Feature 1: 0.000, 1.000
+    Feature 2: 0.000, 1.000
+    Feature 3: 0.000, 1.000
+    Feature 4: 0.000, 1.000
+    Feature 5: 0.000, 1.000
+    Feature 6: 0.000, 1.000
+    Feature 7: 0.000, 1.000
+    Feature 8: 0.000, 1.000
+    Feature 9: 0.000, 1.000
+    Feature 10: 0.000, 1.000
+    Feature 11: 0.000, 1.000
+    Feature 12: 0.000, 1.000
+    Feature 13: 0.000, 1.000
+    Feature 14: 0.000, 1.000
+    Feature 15: 0.000, 1.000
+    Feature 16: 0.000, 1.000
+    Feature 17: 0.000, 1.000
+    Feature 18: 0.000, 1.000
+    Feature 19: 0.000, 1.000
+    Feature 20: 0.000, 1.000
+    Feature 21: 0.000, 1.000
+    Feature 22: 0.000, 1.000
+    Feature 23: 0.000, 1.000
+    Feature 24: 0.000, 1.000
+    Feature 25: 0.000, 1.000
+    Feature 26: 0.000, 1.000
+    Feature 27: 0.000, 1.000
+    Feature 28: 0.000, 1.000
+    Feature 29: 0.000, 1.000
+    Feature 30: 0.000, 1.000
+    Feature 31: 0.050, 1.000
+    Feature 32: 0.000, 1.000
+    Feature 33: 0.000, 1.000
+    Feature 34: 0.000, 1.000
+    Feature 35: 0.000, 1.000
+    Feature 36: 0.000, 1.000
+    Feature 37: 0.000, 1.000
+    Feature 38: 0.000, 1.000
+    Feature 39: 0.000, 1.000
+    Feature 40: 0.000, 1.000
+    Feature 41: 0.000, 255.000
+    Feature 42: 0.000, 255.000
+    Feature 43: 0.000, 255.000
+    Feature 44: 0.000, 255.000
+    Feature 45: 0.000, 255.000
+    Feature 46: 0.000, 255.000
+    Feature 47: 0.000, 255.000
+    Feature 48: 0.000, 255.000
+    Feature 49: 0.000, 255.000
+    Feature 50: 0.000, 255.000
+    Feature 51: 0.000, 255.000
+    Feature 52: 0.000, 255.000
+    Feature 53: 0.000, 255.000
+    Feature 54: 0.000, 255.000
+    Feature 55: 0.000, 255.000
+    Feature 56: 0.000, 255.000
+    Feature 57: 0.000, 255.000
+    Feature 58: 0.000, 255.000
+    Feature 59: 0.000, 255.000
+    Feature 60: 0.000, 255.000
+    Feature 61: 0.000, 255.000
+    Feature 62: 0.000, 255.000
+    Feature 63: 0.000, 255.000
+    Feature 64: 0.000, 255.000
+    Feature 65: 0.000, 255.000
+* Building network
+  * Layer sizes (excluding bias neuron(s)):
+    Layer   1 (hidden):   65
+    Layer   2 (hidden):  128
+    Layer   3 (hidden):   14
+* Training network (using 2009 examples)
+  * Beginning mini-batch gradient descent
+    (batchSize=1, epochLimit=1000, learningRate=0.0100, lambda=0.0000)
+    Initial model with random weights : Cost = 3.697001; Loss = 3.697001; Acc = 0.0348
+    After    100 epochs (200900 iter.): Cost = 0.832928; Loss = 0.832928; Acc = 0.3041
+    After    200 epochs (401800 iter.): Cost = 0.799314; Loss = 0.799314; Acc = 0.3519
+    After    300 epochs (602700 iter.): Cost = 0.732741; Loss = 0.732741; Acc = 0.4201
+    After    400 epochs (803600 iter.): Cost = 0.650008; Loss = 0.650008; Acc = 0.4993
+    After    500 epochs (1004500 iter.): Cost = 0.568416; Loss = 0.568416; Acc = 0.5650
+    After    600 epochs (1205400 iter.): Cost = 0.494587; Loss = 0.494587; Acc = 0.6361
+    After    700 epochs (1406300 iter.): Cost = 0.441019; Loss = 0.441019; Acc = 0.6650
+    After    800 epochs (1607200 iter.): Cost = 0.405187; Loss = 0.405187; Acc = 0.6814
+    After    900 epochs (1808100 iter.): Cost = 0.379488; Loss = 0.379488; Acc = 0.7008
+    After   1000 epochs (2009000 iter.): Cost = 0.360986; Loss = 0.360986; Acc = 0.7133
+  * Done with fitting!
+    Training took 834171ms, 1000 epochs, 2009000 iterations (0.4152ms / iteration)
+    GD Stop condition: Epoch Limit
+* Evaluating accuracy
+  TrainAcc: 0.713290
+  ValidAcc: 0.235060
+
+Tanners-MBP:Assignment3 tannerturba$ Driver -f a03-data/image-10.dat -v 3 -h 1 128
+* Reading a03-data/image-10.dat
+* Doing train/validation split
+* Scaling features
+  * min/max values on training set:
+    Feature 1: 0.000, 1.000
+    Feature 2: 0.000, 1.000
+    Feature 3: 0.000, 1.000
+    Feature 4: 0.000, 1.000
+    Feature 5: 0.000, 1.000
+    Feature 6: 0.000, 1.000
+    Feature 7: 0.000, 1.000
+    Feature 8: 0.000, 1.000
+    Feature 9: 0.000, 1.000
+    Feature 10: 0.000, 1.000
+    Feature 11: 0.000, 1.000
+    Feature 12: 0.000, 1.000
+    Feature 13: 0.000, 1.000
+    Feature 14: 0.000, 1.000
+    Feature 15: 0.000, 1.000
+    Feature 16: 0.000, 1.000
+    Feature 17: 0.000, 1.000
+    Feature 18: 0.000, 1.000
+    Feature 19: 0.000, 1.000
+    Feature 20: 0.000, 1.000
+    Feature 21: 0.000, 1.000
+    Feature 22: 0.000, 1.000
+    Feature 23: 0.000, 1.000
+    Feature 24: 0.000, 1.000
+    Feature 25: 0.000, 1.000
+    Feature 26: 0.000, 1.000
+    Feature 27: 0.000, 1.000
+    Feature 28: 0.000, 1.000
+    Feature 29: 0.000, 1.000
+    Feature 30: 0.000, 1.000
+    Feature 31: 0.050, 1.000
+    Feature 32: 0.000, 1.000
+    Feature 33: 0.000, 1.000
+    Feature 34: 0.000, 1.000
+    Feature 35: 0.000, 1.000
+    Feature 36: 0.000, 1.000
+    Feature 37: 0.000, 1.000
+    Feature 38: 0.000, 1.000
+    Feature 39: 0.000, 1.000
+    Feature 40: 0.000, 1.000
+    Feature 41: 0.000, 255.000
+    Feature 42: 0.000, 255.000
+    Feature 43: 0.000, 255.000
+    Feature 44: 0.000, 255.000
+    Feature 45: 0.000, 255.000
+    Feature 46: 0.000, 255.000
+    Feature 47: 0.000, 255.000
+    Feature 48: 0.000, 255.000
+    Feature 49: 0.000, 255.000
+    Feature 50: 0.000, 255.000
+    Feature 51: 0.000, 255.000
+    Feature 52: 0.000, 255.000
+    Feature 53: 0.000, 255.000
+    Feature 54: 0.000, 255.000
+    Feature 55: 0.000, 255.000
+    Feature 56: 0.000, 255.000
+    Feature 57: 0.000, 255.000
+    Feature 58: 0.000, 255.000
+    Feature 59: 0.000, 255.000
+    Feature 60: 0.000, 255.000
+    Feature 61: 0.000, 255.000
+    Feature 62: 0.000, 255.000
+    Feature 63: 0.000, 255.000
+    Feature 64: 0.000, 255.000
+    Feature 65: 0.000, 255.000
+    Feature 66: 0.000, 255.000
+    Feature 67: 0.000, 255.000
+    Feature 68: 0.000, 255.000
+    Feature 69: 0.000, 255.000
+    Feature 70: 0.000, 255.000
+    Feature 71: 0.000, 255.000
+    Feature 72: 0.000, 255.000
+    Feature 73: 0.000, 255.000
+    Feature 74: 0.000, 255.000
+    Feature 75: 0.000, 255.000
+    Feature 76: 0.000, 255.000
+    Feature 77: 0.000, 255.000
+    Feature 78: 0.000, 255.000
+    Feature 79: 0.000, 255.000
+    Feature 80: 0.000, 255.000
+    Feature 81: 0.000, 255.000
+    Feature 82: 0.000, 255.000
+    Feature 83: 0.000, 255.000
+    Feature 84: 0.000, 255.000
+    Feature 85: 0.000, 255.000
+    Feature 86: 0.000, 255.000
+    Feature 87: 0.000, 255.000
+    Feature 88: 0.000, 255.000
+    Feature 89: 0.000, 255.000
+    Feature 90: 0.000, 255.000
+    Feature 91: 0.000, 255.000
+    Feature 92: 0.000, 255.000
+    Feature 93: 0.000, 255.000
+    Feature 94: 0.000, 255.000
+    Feature 95: 0.000, 255.000
+    Feature 96: 0.000, 255.000
+    Feature 97: 0.000, 255.000
+    Feature 98: 0.000, 255.000
+    Feature 99: 0.000, 255.000
+    Feature 100: 0.000, 255.000
+    Feature 101: 0.000, 255.000
+    Feature 102: 0.000, 255.000
+    Feature 103: 0.000, 255.000
+    Feature 104: 0.000, 255.000
+    Feature 105: 0.000, 255.000
+    Feature 106: 0.000, 255.000
+    Feature 107: 0.000, 255.000
+    Feature 108: 0.000, 255.000
+    Feature 109: 0.000, 255.000
+    Feature 110: 0.000, 255.000
+    Feature 111: 0.000, 255.000
+    Feature 112: 0.000, 255.000
+    Feature 113: 0.000, 255.000
+    Feature 114: 0.000, 255.000
+    Feature 115: 0.000, 255.000
+    Feature 116: 0.000, 255.000
+    Feature 117: 0.000, 255.000
+    Feature 118: 0.000, 255.000
+    Feature 119: 0.000, 255.000
+    Feature 120: 0.000, 255.000
+    Feature 121: 0.000, 255.000
+    Feature 122: 0.000, 255.000
+    Feature 123: 0.000, 255.000
+    Feature 124: 0.000, 255.000
+    Feature 125: 0.000, 255.000
+    Feature 126: 0.000, 255.000
+    Feature 127: 0.000, 255.000
+    Feature 128: 0.000, 255.000
+    Feature 129: 0.000, 255.000
+    Feature 130: 0.000, 255.000
+    Feature 131: 0.000, 255.000
+    Feature 132: 0.000, 255.000
+    Feature 133: 0.000, 255.000
+    Feature 134: 0.000, 255.000
+    Feature 135: 0.000, 255.000
+    Feature 136: 0.000, 255.000
+    Feature 137: 0.000, 255.000
+    Feature 138: 0.000, 255.000
+    Feature 139: 0.000, 255.000
+    Feature 140: 0.000, 255.000
+* Building network
+  * Layer sizes (excluding bias neuron(s)):
+    Layer   1 (hidden):  140
+    Layer   2 (hidden):  128
+    Layer   3 (hidden):   14
+* Training network (using 2009 examples)
+  * Beginning mini-batch gradient descent
+    (batchSize=1, epochLimit=1000, learningRate=0.0100, lambda=0.0000)
+    Initial model with random weights : Cost = 3.838193; Loss = 3.838193; Acc = 0.0229
+    After    100 epochs (200900 iter.): Cost = 0.771223; Loss = 0.771223; Acc = 0.3788
+    After    200 epochs (401800 iter.): Cost = 0.617398; Loss = 0.617398; Acc = 0.5256
+    After    300 epochs (602700 iter.): Cost = 0.490726; Loss = 0.490726; Acc = 0.6292
+    After    400 epochs (803600 iter.): Cost = 0.419843; Loss = 0.419843; Acc = 0.6789
+    After    500 epochs (1004500 iter.): Cost = 0.375344; Loss = 0.375344; Acc = 0.7083
+    After    600 epochs (1205400 iter.): Cost = 0.349169; Loss = 0.349169; Acc = 0.7218
+    After    700 epochs (1406300 iter.): Cost = 0.334526; Loss = 0.334526; Acc = 0.7282
+    After    800 epochs (1607200 iter.): Cost = 0.320703; Loss = 0.320703; Acc = 0.7362
+    After    900 epochs (1808100 iter.): Cost = 0.310992; Loss = 0.310992; Acc = 0.7417
+    After   1000 epochs (2009000 iter.): Cost = 0.303675; Loss = 0.303675; Acc = 0.7491
+  * Done with fitting!
+    Training took 1716148ms, 1000 epochs, 2009000 iterations (0.8542ms / iteration)
+    GD Stop condition: Epoch Limit
+* Evaluating accuracy
+  TrainAcc: 0.749129
+  ValidAcc: 0.250996
+
+Tanners-MBP:Assignment3 tannerturba$ Driver -f a03-data/image-15.dat -v 3 -h 1 128
+   Feature 58: 0.000, 255.000
+    Feature 59: 0.000, 255.000
+    Feature 60: 0.000, 255.000
+    Feature 61: 0.000, 255.000
+    Feature 62: 0.000, 255.000
+    Feature 63: 0.000, 255.000
+    Feature 64: 0.000, 255.000
+    Feature 65: 0.000, 255.000
+    Feature 66: 0.000, 255.000
+    Feature 67: 0.000, 255.000
+    Feature 68: 0.000, 255.000
+    Feature 69: 0.000, 255.000
+    Feature 70: 0.000, 255.000
+    Feature 71: 0.000, 255.000
+    Feature 72: 0.000, 255.000
+    Feature 73: 0.000, 255.000
+    Feature 74: 0.000, 255.000
+    Feature 75: 0.000, 255.000
+    Feature 76: 0.000, 255.000
+    Feature 77: 0.000, 255.000
+    Feature 78: 0.000, 255.000
+    Feature 79: 0.000, 255.000
+    Feature 80: 0.000, 255.000
+    Feature 81: 0.000, 255.000
+    Feature 82: 0.000, 255.000
+    Feature 83: 0.000, 255.000
+    Feature 84: 0.000, 255.000
+    Feature 85: 0.000, 255.000
+    Feature 86: 0.000, 255.000
+    Feature 87: 0.000, 255.000
+    Feature 88: 0.000, 255.000
+    Feature 89: 0.000, 255.000
+    Feature 90: 0.000, 255.000
+    Feature 91: 0.000, 255.000
+    Feature 92: 0.000, 255.000
+    Feature 93: 0.000, 255.000
+    Feature 94: 0.000, 255.000
+    Feature 95: 0.000, 255.000
+    Feature 96: 0.000, 255.000
+    Feature 97: 0.000, 255.000
+    Feature 98: 0.000, 255.000
+    Feature 99: 0.000, 255.000
+    Feature 100: 0.000, 255.000
+    Feature 101: 0.000, 255.000
+    Feature 102: 0.000, 255.000
+    Feature 103: 0.000, 255.000
+    Feature 104: 0.000, 255.000
+    Feature 105: 0.000, 255.000
+    Feature 106: 0.000, 255.000
+    Feature 107: 0.000, 255.000
+    Feature 108: 0.000, 255.000
+    Feature 109: 0.000, 255.000
+    Feature 110: 0.000, 255.000
+    Feature 111: 0.000, 255.000
+    Feature 112: 0.000, 255.000
+    Feature 113: 0.000, 255.000
+    Feature 114: 0.000, 255.000
+    Feature 115: 0.000, 255.000
+    Feature 116: 0.000, 255.000
+    Feature 117: 0.000, 255.000
+    Feature 118: 0.000, 255.000
+    Feature 119: 0.000, 255.000
+    Feature 120: 0.000, 255.000
+    Feature 121: 0.000, 255.000
+    Feature 122: 0.000, 255.000
+    Feature 123: 0.000, 255.000
+    Feature 124: 0.000, 255.000
+    Feature 125: 0.000, 255.000
+    Feature 126: 0.000, 255.000
+    Feature 127: 0.000, 255.000
+    Feature 128: 0.000, 255.000
+    Feature 129: 0.000, 255.000
+    Feature 130: 0.000, 255.000
+    Feature 131: 0.000, 255.000
+    Feature 132: 0.000, 255.000
+    Feature 133: 0.000, 255.000
+    Feature 134: 0.000, 255.000
+    Feature 135: 0.000, 255.000
+    Feature 136: 0.000, 255.000
+    Feature 137: 0.000, 255.000
+    Feature 138: 0.000, 255.000
+    Feature 139: 0.000, 255.000
+    Feature 140: 0.000, 255.000
+    Feature 141: 0.000, 255.000
+    Feature 142: 0.000, 255.000
+    Feature 143: 0.000, 255.000
+    Feature 144: 0.000, 255.000
+    Feature 145: 0.000, 255.000
+    Feature 146: 0.000, 255.000
+    Feature 147: 0.000, 255.000
+    Feature 148: 0.000, 255.000
+    Feature 149: 0.000, 255.000
+    Feature 150: 0.000, 255.000
+    Feature 151: 0.000, 255.000
+    Feature 152: 0.000, 255.000
+    Feature 153: 0.000, 255.000
+    Feature 154: 0.000, 255.000
+    Feature 155: 0.000, 255.000
+    Feature 156: 0.000, 255.000
+    Feature 157: 0.000, 255.000
+    Feature 158: 0.000, 255.000
+    Feature 159: 0.000, 255.000
+    Feature 160: 0.000, 255.000
+    Feature 161: 0.000, 255.000
+    Feature 162: 0.000, 255.000
+    Feature 163: 0.000, 255.000
+    Feature 164: 0.000, 255.000
+    Feature 165: 0.000, 255.000
+    Feature 166: 0.000, 255.000
+    Feature 167: 0.000, 255.000
+    Feature 168: 0.000, 255.000
+    Feature 169: 0.000, 255.000
+    Feature 170: 0.000, 255.000
+    Feature 171: 0.000, 255.000
+    Feature 172: 0.000, 255.000
+    Feature 173: 0.000, 255.000
+    Feature 174: 0.000, 255.000
+    Feature 175: 0.000, 255.000
+    Feature 176: 0.000, 255.000
+    Feature 177: 0.000, 255.000
+    Feature 178: 0.000, 255.000
+    Feature 179: 0.000, 255.000
+    Feature 180: 0.000, 255.000
+    Feature 181: 0.000, 255.000
+    Feature 182: 0.000, 255.000
+    Feature 183: 0.000, 255.000
+    Feature 184: 0.000, 255.000
+    Feature 185: 0.000, 255.000
+    Feature 186: 0.000, 255.000
+    Feature 187: 0.000, 255.000
+    Feature 188: 0.000, 255.000
+    Feature 189: 0.000, 255.000
+    Feature 190: 0.000, 255.000
+    Feature 191: 0.000, 255.000
+    Feature 192: 0.000, 255.000
+    Feature 193: 0.000, 255.000
+    Feature 194: 0.000, 255.000
+    Feature 195: 0.000, 255.000
+    Feature 196: 0.000, 255.000
+    Feature 197: 0.000, 255.000
+    Feature 198: 0.000, 255.000
+    Feature 199: 0.000, 255.000
+    Feature 200: 0.000, 255.000
+    Feature 201: 0.000, 255.000
+    Feature 202: 0.000, 255.000
+    Feature 203: 0.000, 255.000
+    Feature 204: 0.000, 255.000
+    Feature 205: 0.000, 255.000
+    Feature 206: 0.000, 255.000
+    Feature 207: 0.000, 255.000
+    Feature 208: 0.000, 255.000
+    Feature 209: 0.000, 255.000
+    Feature 210: 0.000, 255.000
+    Feature 211: 0.000, 255.000
+    Feature 212: 0.000, 255.000
+    Feature 213: 0.000, 255.000
+    Feature 214: 0.000, 255.000
+    Feature 215: 0.000, 255.000
+    Feature 216: 0.000, 255.000
+    Feature 217: 0.000, 255.000
+    Feature 218: 0.000, 255.000
+    Feature 219: 0.000, 255.000
+    Feature 220: 0.000, 255.000
+    Feature 221: 0.000, 255.000
+    Feature 222: 0.000, 255.000
+    Feature 223: 0.000, 255.000
+    Feature 224: 0.000, 255.000
+    Feature 225: 0.000, 255.000
+    Feature 226: 0.000, 255.000
+    Feature 227: 0.000, 255.000
+    Feature 228: 0.000, 255.000
+    Feature 229: 0.000, 255.000
+    Feature 230: 0.000, 255.000
+    Feature 231: 0.000, 255.000
+    Feature 232: 0.000, 255.000
+    Feature 233: 0.000, 255.000
+    Feature 234: 0.000, 255.000
+    Feature 235: 0.000, 255.000
+    Feature 236: 0.000, 255.000
+    Feature 237: 0.000, 255.000
+    Feature 238: 0.000, 255.000
+    Feature 239: 0.000, 255.000
+    Feature 240: 0.000, 255.000
+    Feature 241: 0.000, 255.000
+    Feature 242: 0.000, 255.000
+    Feature 243: 0.000, 255.000
+    Feature 244: 0.000, 255.000
+    Feature 245: 0.000, 255.000
+    Feature 246: 0.000, 255.000
+    Feature 247: 0.000, 255.000
+    Feature 248: 0.000, 255.000
+    Feature 249: 0.000, 255.000
+    Feature 250: 0.000, 255.000
+    Feature 251: 0.000, 255.000
+    Feature 252: 0.000, 255.000
+    Feature 253: 0.000, 255.000
+    Feature 254: 0.000, 255.000
+    Feature 255: 0.000, 255.000
+    Feature 256: 0.000, 255.000
+    Feature 257: 0.000, 255.000
+    Feature 258: 0.000, 255.000
+    Feature 259: 0.000, 255.000
+    Feature 260: 0.000, 255.000
+    Feature 261: 0.000, 255.000
+    Feature 262: 0.000, 255.000
+    Feature 263: 0.000, 255.000
+    Feature 264: 0.000, 255.000
+    Feature 265: 0.000, 255.000
+* Building network
+  * Layer sizes (excluding bias neuron(s)):
+    Layer   1 (hidden):  265
+    Layer   2 (hidden):  128
+    Layer   3 (hidden):   14
+* Training network (using 2009 examples)
+  * Beginning mini-batch gradient descent
+    (batchSize=1, epochLimit=1000, learningRate=0.0100, lambda=0.0000)
+    Initial model with random weights : Cost = 3.520905; Loss = 3.520905; Acc = 0.0796
+    After    100 epochs (200900 iter.): Cost = 0.640220; Loss = 0.640220; Acc = 0.5222
+    After    200 epochs (401800 iter.): Cost = 0.416967; Loss = 0.416967; Acc = 0.6904
+    After    300 epochs (602700 iter.): Cost = 0.324272; Loss = 0.324272; Acc = 0.7601
+    After    400 epochs (803600 iter.): Cost = 0.287071; Loss = 0.287071; Acc = 0.7805
+    After    500 epochs (1004500 iter.): Cost = 0.269862; Loss = 0.269862; Acc = 0.7889
+    After    600 epochs (1205400 iter.): Cost = 0.257879; Loss = 0.257879; Acc = 0.7989
+    After    700 epochs (1406300 iter.): Cost = 0.249394; Loss = 0.249394; Acc = 0.8029
+    After    800 epochs (1607200 iter.): Cost = 0.242930; Loss = 0.242930; Acc = 0.8069
+    After    900 epochs (1808100 iter.): Cost = 0.238215; Loss = 0.238215; Acc = 0.8109
+    After   1000 epochs (2009000 iter.): Cost = 0.234246; Loss = 0.234246; Acc = 0.8133
+  * Done with fitting!
+    Training took 3244992ms, 1000 epochs, 2009000 iterations (1.6152ms / iteration)
+    GD Stop condition: Epoch Limit
+* Evaluating accuracy
+  TrainAcc: 0.813340
+  ValidAcc: 0.260956
+
+Tanners-MBP:Assignment3 tannerturba$ Driver -f a03-data/image-20.dat -v 3 -h 1 128 
+* Reading a03-data/image-20.dat
+* Doing train/validation split
+* Scaling features
+  * min/max values on training set:
+    Feature 1: 0.000, 1.000
+    Feature 2: 0.000, 1.000
+    Feature 3: 0.000, 1.000
+    Feature 4: 0.000, 1.000
+    Feature 5: 0.000, 1.000
+    Feature 6: 0.000, 1.000
+    Feature 7: 0.000, 1.000
+    Feature 8: 0.000, 1.000
+    Feature 9: 0.000, 1.000
+    Feature 10: 0.000, 1.000
+    Feature 11: 0.000, 1.000
+    Feature 12: 0.000, 1.000
+    Feature 13: 0.000, 1.000
+    Feature 14: 0.000, 1.000
+    Feature 15: 0.000, 1.000
+    Feature 16: 0.000, 1.000
+    Feature 17: 0.000, 1.000
+    Feature 18: 0.000, 1.000
+    Feature 19: 0.000, 1.000
+    Feature 20: 0.000, 1.000
+    Feature 21: 0.000, 1.000
+    Feature 22: 0.000, 1.000
+    Feature 23: 0.000, 1.000
+    Feature 24: 0.000, 1.000
+    Feature 25: 0.000, 1.000
+    Feature 26: 0.000, 1.000
+    Feature 27: 0.000, 1.000
+    Feature 28: 0.000, 1.000
+    Feature 29: 0.000, 1.000
+    Feature 30: 0.000, 1.000
+    Feature 31: 0.050, 1.000
+    Feature 32: 0.000, 1.000
+    Feature 33: 0.000, 1.000
+    Feature 34: 0.000, 1.000
+    Feature 35: 0.000, 1.000
+    Feature 36: 0.000, 1.000
+    Feature 37: 0.000, 1.000
+    Feature 38: 0.000, 1.000
+    Feature 39: 0.000, 1.000
+    Feature 40: 0.000, 1.000
+    Feature 41: 0.000, 255.000
+    Feature 42: 0.000, 255.000
+    Feature 43: 0.000, 255.000
+    Feature 44: 0.000, 255.000
+    Feature 45: 0.000, 255.000
+    Feature 46: 0.000, 255.000
+    Feature 47: 0.000, 255.000
+    Feature 48: 0.000, 255.000
+    Feature 49: 0.000, 255.000
+    Feature 50: 0.000, 255.000
+    Feature 51: 0.000, 255.000
+    Feature 52: 0.000, 255.000
+    Feature 53: 0.000, 255.000
+    Feature 54: 0.000, 255.000
+    Feature 55: 0.000, 255.000
+    Feature 56: 0.000, 255.000
+    Feature 57: 0.000, 255.000
+    Feature 58: 0.000, 255.000
+    Feature 59: 0.000, 255.000
+    Feature 60: 0.000, 255.000
+    Feature 61: 0.000, 255.000
+    Feature 62: 0.000, 255.000
+    Feature 63: 0.000, 255.000
+    Feature 64: 0.000, 255.000
+    Feature 65: 0.000, 255.000
+    Feature 66: 0.000, 255.000
+    Feature 67: 0.000, 255.000
+    Feature 68: 0.000, 255.000
+    Feature 69: 0.000, 255.000
+    Feature 70: 0.000, 255.000
+    Feature 71: 0.000, 255.000
+    Feature 72: 0.000, 255.000
+    Feature 73: 0.000, 255.000
+    Feature 74: 0.000, 255.000
+    Feature 75: 0.000, 255.000
+    Feature 76: 0.000, 255.000
+    Feature 77: 0.000, 255.000
+    Feature 78: 0.000, 255.000
+    Feature 79: 0.000, 255.000
+    Feature 80: 0.000, 255.000
+    Feature 81: 0.000, 255.000
+    Feature 82: 0.000, 255.000
+    Feature 83: 0.000, 255.000
+    Feature 84: 0.000, 255.000
+    Feature 85: 0.000, 255.000
+    Feature 86: 0.000, 255.000
+    Feature 87: 0.000, 255.000
+    Feature 88: 0.000, 255.000
+    Feature 89: 0.000, 255.000
+    Feature 90: 0.000, 255.000
+    Feature 91: 0.000, 255.000
+    Feature 92: 0.000, 255.000
+    Feature 93: 0.000, 255.000
+    Feature 94: 0.000, 255.000
+    Feature 95: 0.000, 255.000
+    Feature 96: 0.000, 255.000
+    Feature 97: 0.000, 255.000
+    Feature 98: 0.000, 255.000
+    Feature 99: 0.000, 255.000
+    Feature 100: 0.000, 255.000
+    Feature 101: 0.000, 255.000
+    Feature 102: 0.000, 255.000
+    Feature 103: 0.000, 255.000
+    Feature 104: 0.000, 255.000
+    Feature 105: 0.000, 255.000
+    Feature 106: 0.000, 255.000
+    Feature 107: 0.000, 255.000
+    Feature 108: 0.000, 255.000
+    Feature 109: 0.000, 255.000
+    Feature 110: 0.000, 255.000
+    Feature 111: 0.000, 255.000
+    Feature 112: 0.000, 255.000
+    Feature 113: 0.000, 255.000
+    Feature 114: 0.000, 255.000
+    Feature 115: 0.000, 255.000
+    Feature 116: 0.000, 255.000
+    Feature 117: 0.000, 255.000
+    Feature 118: 0.000, 255.000
+    Feature 119: 0.000, 255.000
+    Feature 120: 0.000, 255.000
+    Feature 121: 0.000, 255.000
+    Feature 122: 0.000, 255.000
+    Feature 123: 0.000, 255.000
+    Feature 124: 0.000, 255.000
+    Feature 125: 0.000, 255.000
+    Feature 126: 0.000, 255.000
+    Feature 127: 0.000, 255.000
+    Feature 128: 0.000, 255.000
+    Feature 129: 0.000, 255.000
+    Feature 130: 0.000, 255.000
+    Feature 131: 0.000, 255.000
+    Feature 132: 0.000, 255.000
+    Feature 133: 0.000, 255.000
+    Feature 134: 0.000, 255.000
+    Feature 135: 0.000, 255.000
+    Feature 136: 0.000, 255.000
+    Feature 137: 0.000, 255.000
+    Feature 138: 0.000, 255.000
+    Feature 139: 0.000, 255.000
+    Feature 140: 0.000, 255.000
+    Feature 141: 0.000, 255.000
+    Feature 142: 0.000, 255.000
+    Feature 143: 0.000, 255.000
+    Feature 144: 0.000, 255.000
+    Feature 145: 0.000, 255.000
+    Feature 146: 0.000, 255.000
+    Feature 147: 0.000, 255.000
+    Feature 148: 0.000, 255.000
+    Feature 149: 0.000, 255.000
+    Feature 150: 0.000, 255.000
+    Feature 151: 0.000, 255.000
+    Feature 152: 0.000, 255.000
+    Feature 153: 0.000, 255.000
+    Feature 154: 0.000, 255.000
+    Feature 155: 0.000, 255.000
+    Feature 156: 0.000, 255.000
+    Feature 157: 0.000, 255.000
+    Feature 158: 0.000, 255.000
+    Feature 159: 0.000, 255.000
+    Feature 160: 0.000, 255.000
+    Feature 161: 0.000, 255.000
+    Feature 162: 0.000, 255.000
+    Feature 163: 0.000, 255.000
+    Feature 164: 0.000, 255.000
+    Feature 165: 0.000, 255.000
+    Feature 166: 0.000, 255.000
+    Feature 167: 0.000, 255.000
+    Feature 168: 0.000, 255.000
+    Feature 169: 0.000, 255.000
+    Feature 170: 0.000, 255.000
+    Feature 171: 0.000, 255.000
+    Feature 172: 0.000, 255.000
+    Feature 173: 0.000, 255.000
+    Feature 174: 0.000, 255.000
+    Feature 175: 0.000, 255.000
+    Feature 176: 0.000, 255.000
+    Feature 177: 0.000, 255.000
+    Feature 178: 0.000, 255.000
+    Feature 179: 0.000, 255.000
+    Feature 180: 0.000, 255.000
+    Feature 181: 0.000, 255.000
+    Feature 182: 0.000, 255.000
+    Feature 183: 0.000, 255.000
+    Feature 184: 0.000, 255.000
+    Feature 185: 0.000, 255.000
+    Feature 186: 0.000, 255.000
+    Feature 187: 0.000, 255.000
+    Feature 188: 0.000, 255.000
+    Feature 189: 0.000, 255.000
+    Feature 190: 0.000, 255.000
+    Feature 191: 0.000, 255.000
+    Feature 192: 0.000, 255.000
+    Feature 193: 0.000, 255.000
+    Feature 194: 0.000, 255.000
+    Feature 195: 0.000, 255.000
+    Feature 196: 0.000, 255.000
+    Feature 197: 0.000, 255.000
+    Feature 198: 0.000, 255.000
+    Feature 199: 0.000, 255.000
+    Feature 200: 0.000, 255.000
+    Feature 201: 0.000, 255.000
+    Feature 202: 0.000, 255.000
+    Feature 203: 0.000, 255.000
+    Feature 204: 0.000, 255.000
+    Feature 205: 0.000, 255.000
+    Feature 206: 0.000, 255.000
+    Feature 207: 0.000, 255.000
+    Feature 208: 0.000, 255.000
+    Feature 209: 0.000, 255.000
+    Feature 210: 0.000, 255.000
+    Feature 211: 0.000, 255.000
+    Feature 212: 0.000, 255.000
+    Feature 213: 0.000, 255.000
+    Feature 214: 0.000, 255.000
+    Feature 215: 0.000, 255.000
+    Feature 216: 0.000, 255.000
+    Feature 217: 0.000, 255.000
+    Feature 218: 0.000, 255.000
+    Feature 219: 0.000, 255.000
+    Feature 220: 0.000, 255.000
+    Feature 221: 0.000, 255.000
+    Feature 222: 0.000, 255.000
+    Feature 223: 0.000, 255.000
+    Feature 224: 0.000, 255.000
+    Feature 225: 0.000, 255.000
+    Feature 226: 0.000, 255.000
+    Feature 227: 0.000, 255.000
+    Feature 228: 0.000, 255.000
+    Feature 229: 0.000, 255.000
+    Feature 230: 0.000, 255.000
+    Feature 231: 0.000, 255.000
+    Feature 232: 0.000, 255.000
+    Feature 233: 0.000, 255.000
+    Feature 234: 0.000, 255.000
+    Feature 235: 0.000, 255.000
+    Feature 236: 0.000, 255.000
+    Feature 237: 0.000, 255.000
+    Feature 238: 0.000, 255.000
+    Feature 239: 0.000, 255.000
+    Feature 240: 0.000, 255.000
+    Feature 241: 0.000, 255.000
+    Feature 242: 0.000, 255.000
+    Feature 243: 0.000, 255.000
+    Feature 244: 0.000, 255.000
+    Feature 245: 0.000, 255.000
+    Feature 246: 0.000, 255.000
+    Feature 247: 0.000, 255.000
+    Feature 248: 0.000, 255.000
+    Feature 249: 0.000, 255.000
+    Feature 250: 0.000, 255.000
+    Feature 251: 0.000, 255.000
+    Feature 252: 0.000, 255.000
+    Feature 253: 0.000, 255.000
+    Feature 254: 0.000, 255.000
+    Feature 255: 0.000, 255.000
+    Feature 256: 0.000, 255.000
+    Feature 257: 0.000, 255.000
+    Feature 258: 0.000, 255.000
+    Feature 259: 0.000, 255.000
+    Feature 260: 0.000, 255.000
+    Feature 261: 0.000, 255.000
+    Feature 262: 0.000, 255.000
+    Feature 263: 0.000, 255.000
+    Feature 264: 0.000, 255.000
+    Feature 265: 0.000, 255.000
+    Feature 266: 0.000, 255.000
+    Feature 267: 0.000, 255.000
+    Feature 268: 0.000, 255.000
+    Feature 269: 0.000, 255.000
+    Feature 270: 0.000, 255.000
+    Feature 271: 0.000, 255.000
+    Feature 272: 0.000, 255.000
+    Feature 273: 0.000, 255.000
+    Feature 274: 0.000, 255.000
+    Feature 275: 0.000, 255.000
+    Feature 276: 0.000, 255.000
+    Feature 277: 0.000, 255.000
+    Feature 278: 0.000, 255.000
+    Feature 279: 0.000, 255.000
+    Feature 280: 0.000, 255.000
+    Feature 281: 0.000, 255.000
+    Feature 282: 0.000, 255.000
+    Feature 283: 0.000, 255.000
+    Feature 284: 0.000, 255.000
+    Feature 285: 0.000, 255.000
+    Feature 286: 0.000, 255.000
+    Feature 287: 0.000, 255.000
+    Feature 288: 0.000, 255.000
+    Feature 289: 0.000, 255.000
+    Feature 290: 0.000, 255.000
+    Feature 291: 0.000, 255.000
+    Feature 292: 0.000, 255.000
+    Feature 293: 0.000, 255.000
+    Feature 294: 0.000, 255.000
+    Feature 295: 0.000, 255.000
+    Feature 296: 0.000, 255.000
+    Feature 297: 0.000, 255.000
+    Feature 298: 0.000, 255.000
+    Feature 299: 0.000, 255.000
+    Feature 300: 0.000, 255.000
+    Feature 301: 0.000, 255.000
+    Feature 302: 0.000, 255.000
+    Feature 303: 0.000, 255.000
+    Feature 304: 0.000, 255.000
+    Feature 305: 0.000, 255.000
+    Feature 306: 0.000, 255.000
+    Feature 307: 0.000, 255.000
+    Feature 308: 0.000, 255.000
+    Feature 309: 0.000, 255.000
+    Feature 310: 0.000, 255.000
+    Feature 311: 0.000, 255.000
+    Feature 312: 0.000, 255.000
+    Feature 313: 0.000, 255.000
+    Feature 314: 0.000, 255.000
+    Feature 315: 0.000, 255.000
+    Feature 316: 0.000, 255.000
+    Feature 317: 0.000, 255.000
+    Feature 318: 0.000, 255.000
+    Feature 319: 0.000, 255.000
+    Feature 320: 0.000, 255.000
+    Feature 321: 0.000, 255.000
+    Feature 322: 0.000, 255.000
+    Feature 323: 0.000, 255.000
+    Feature 324: 0.000, 255.000
+    Feature 325: 0.000, 255.000
+    Feature 326: 0.000, 255.000
+    Feature 327: 0.000, 255.000
+    Feature 328: 0.000, 255.000
+    Feature 329: 0.000, 255.000
+    Feature 330: 0.000, 255.000
+    Feature 331: 0.000, 255.000
+    Feature 332: 0.000, 255.000
+    Feature 333: 0.000, 255.000
+    Feature 334: 0.000, 255.000
+    Feature 335: 0.000, 255.000
+    Feature 336: 0.000, 255.000
+    Feature 337: 0.000, 255.000
+    Feature 338: 0.000, 255.000
+    Feature 339: 0.000, 255.000
+    Feature 340: 0.000, 255.000
+    Feature 341: 0.000, 255.000
+    Feature 342: 0.000, 255.000
+    Feature 343: 0.000, 255.000
+    Feature 344: 0.000, 255.000
+    Feature 345: 0.000, 255.000
+    Feature 346: 0.000, 255.000
+    Feature 347: 0.000, 255.000
+    Feature 348: 0.000, 255.000
+    Feature 349: 0.000, 255.000
+    Feature 350: 0.000, 255.000
+    Feature 351: 0.000, 255.000
+    Feature 352: 0.000, 255.000
+    Feature 353: 0.000, 255.000
+    Feature 354: 0.000, 255.000
+    Feature 355: 0.000, 255.000
+    Feature 356: 0.000, 255.000
+    Feature 357: 0.000, 255.000
+    Feature 358: 0.000, 255.000
+    Feature 359: 0.000, 255.000
+    Feature 360: 0.000, 255.000
+    Feature 361: 0.000, 255.000
+    Feature 362: 0.000, 255.000
+    Feature 363: 0.000, 255.000
+    Feature 364: 0.000, 255.000
+    Feature 365: 0.000, 255.000
+    Feature 366: 0.000, 255.000
+    Feature 367: 0.000, 255.000
+    Feature 368: 0.000, 255.000
+    Feature 369: 0.000, 255.000
+    Feature 370: 0.000, 255.000
+    Feature 371: 0.000, 255.000
+    Feature 372: 0.000, 255.000
+    Feature 373: 0.000, 255.000
+    Feature 374: 0.000, 255.000
+    Feature 375: 0.000, 255.000
+    Feature 376: 0.000, 255.000
+    Feature 377: 0.000, 255.000
+    Feature 378: 0.000, 255.000
+    Feature 379: 0.000, 255.000
+    Feature 380: 0.000, 255.000
+    Feature 381: 0.000, 255.000
+    Feature 382: 0.000, 255.000
+    Feature 383: 0.000, 255.000
+    Feature 384: 0.000, 255.000
+    Feature 385: 0.000, 255.000
+    Feature 386: 0.000, 255.000
+    Feature 387: 0.000, 255.000
+    Feature 388: 0.000, 255.000
+    Feature 389: 0.000, 255.000
+    Feature 390: 0.000, 255.000
+    Feature 391: 0.000, 255.000
+    Feature 392: 0.000, 255.000
+    Feature 393: 0.000, 255.000
+    Feature 394: 0.000, 255.000
+    Feature 395: 0.000, 255.000
+    Feature 396: 0.000, 255.000
+    Feature 397: 0.000, 255.000
+    Feature 398: 0.000, 255.000
+    Feature 399: 0.000, 255.000
+    Feature 400: 0.000, 255.000
+    Feature 401: 0.000, 255.000
+    Feature 402: 0.000, 255.000
+    Feature 403: 0.000, 255.000
+    Feature 404: 0.000, 255.000
+    Feature 405: 0.000, 255.000
+    Feature 406: 0.000, 255.000
+    Feature 407: 0.000, 255.000
+    Feature 408: 0.000, 255.000
+    Feature 409: 0.000, 255.000
+    Feature 410: 0.000, 255.000
+    Feature 411: 0.000, 255.000
+    Feature 412: 0.000, 255.000
+    Feature 413: 0.000, 255.000
+    Feature 414: 0.000, 255.000
+    Feature 415: 0.000, 255.000
+    Feature 416: 0.000, 255.000
+    Feature 417: 0.000, 255.000
+    Feature 418: 0.000, 255.000
+    Feature 419: 0.000, 255.000
+    Feature 420: 0.000, 255.000
+    Feature 421: 0.000, 255.000
+    Feature 422: 0.000, 255.000
+    Feature 423: 0.000, 255.000
+    Feature 424: 0.000, 255.000
+    Feature 425: 0.000, 255.000
+    Feature 426: 0.000, 255.000
+    Feature 427: 0.000, 255.000
+    Feature 428: 0.000, 255.000
+    Feature 429: 0.000, 255.000
+    Feature 430: 0.000, 255.000
+    Feature 431: 0.000, 255.000
+    Feature 432: 0.000, 255.000
+    Feature 433: 0.000, 255.000
+    Feature 434: 0.000, 255.000
+    Feature 435: 0.000, 255.000
+    Feature 436: 0.000, 255.000
+    Feature 437: 0.000, 255.000
+    Feature 438: 0.000, 255.000
+    Feature 439: 0.000, 255.000
+    Feature 440: 0.000, 255.000
+* Building network
+  * Layer sizes (excluding bias neuron(s)):
+    Layer   1 (hidden):  440
+    Layer   2 (hidden):  128
+    Layer   3 (hidden):   14
+* Training network (using 2009 examples)
+  * Beginning mini-batch gradient descent
+    (batchSize=1, epochLimit=1000, learningRate=0.0100, lambda=0.0000)
+    Initial model with random weights : Cost = 3.903703; Loss = 3.903703; Acc = 0.0493
+    After    100 epochs (200900 iter.): Cost = 0.430073; Loss = 0.430073; Acc = 0.6879
+    After    200 epochs (401800 iter.): Cost = 0.287784; Loss = 0.287784; Acc = 0.7775
+    After    300 epochs (602700 iter.): Cost = 0.250592; Loss = 0.250592; Acc = 0.8034
+    After    400 epochs (803600 iter.): Cost = 0.231676; Loss = 0.231676; Acc = 0.8173
+    After    500 epochs (1004500 iter.): Cost = 0.220177; Loss = 0.220177; Acc = 0.8263
+    After    600 epochs (1205400 iter.): Cost = 0.209807; Loss = 0.209807; Acc = 0.8357
+    After    700 epochs (1406300 iter.): Cost = 0.202815; Loss = 0.202815; Acc = 0.8437
+    After    800 epochs (1607200 iter.): Cost = 0.197604; Loss = 0.197604; Acc = 0.8472
+    After    900 epochs (1808100 iter.): Cost = 0.193406; Loss = 0.193406; Acc = 0.8502
+    After   1000 epochs (2009000 iter.): Cost = 0.189524; Loss = 0.189524; Acc = 0.8542
+  * Done with fitting!
+    Training took 5921216ms, 1000 epochs, 2009000 iterations (2.9473ms / iteration)
+    GD Stop condition: Epoch Limit
+* Evaluating accuracy
+  TrainAcc: 0.854156
+  ValidAcc: 0.254980
