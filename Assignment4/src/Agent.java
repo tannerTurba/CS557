@@ -1,3 +1,10 @@
+/*
+ * Tanner Turba
+ * December 10, 2024
+ * CS 557 - Machine Learning
+ * 
+ * This class defines an agent, which moves through the grid environment.
+ */
 public class Agent {
     private Cell currentCell;
     private int score = 0;
@@ -6,18 +13,31 @@ public class Agent {
     private double actionSuccessProbability;
     private Grid grid;
 
+    /**
+     * Instantiates a new agent.
+     * @param actionSuccessProbability
+     * @param grid
+     */
     public Agent(double actionSuccessProbability, Grid grid) {
         this.actionSuccessProbability = actionSuccessProbability;
         this.grid = grid;
         this.currentCell = grid.getStartingCell();
     }
 
+    /**
+     * Sets the agent back at start and resets the score. 
+     */
     public void reset() {
         currentCell = grid.getStartingCell();
         score = 0;
         isTerminated = false;
     }
 
+    /**
+     * Moves the agent based on the specified. Also accounts for drift.
+     * @param a the action to take.
+     * @return
+     */
     public double move(Action a) {
         if (currentCell.getType() == CellType.CLIFF) {
             // Acting in a cliff -> return to start
@@ -26,26 +46,23 @@ public class Agent {
             return -10;
         }
 
+        // Calculate drift and find potential new location.
         int drift = calcDrift();
         Cell potentialLocation = null;
         switch (a) {
             case UP:
-                // System.out.println("moving up");
                 potentialLocation = moveUp(grid, currentCell, drift);
                 break;
 
             case DOWN:
-                // System.out.println("moving down");
                 potentialLocation = moveDown(grid, currentCell, drift);
                 break;
 
             case LEFT:
-                // System.out.println("moving left");
                 potentialLocation = moveLeft(grid, currentCell, drift);
                 break;
 
             case RIGHT:
-                // System.out.println("moving right");
                 potentialLocation = moveRight(grid, currentCell, drift);
                 break;
         
@@ -54,6 +71,7 @@ public class Agent {
         }
 
         if (potentialLocation != null && !potentialLocation.getType().isBlocking()) {
+            // If the agent can move to the new location, set currentCell
             currentCell = potentialLocation;
 
             if (potentialLocation.getType() == CellType.CLIFF) {
@@ -62,7 +80,7 @@ public class Agent {
                 return -20;
             }
             else if (potentialLocation.getType().isTerminal()) {
-                // no futher action is possible
+                // No futher action is possible
                 isTerminated = true;
 
                 if (potentialLocation.getType() == CellType.GOAL) {
@@ -85,6 +103,13 @@ public class Agent {
         return 0;
     }
 
+    /**
+     * Moves the agent up, with possible drift.
+     * @param grid the grid the agent is operating in.
+     * @param current the current cell that the agent is in.
+     * @param drift the drift integer, which determines which direction the agent will drift, if any.
+     * @return
+     */
     private Cell moveUp(Grid grid, Cell current, int drift) {
         int x = current.getXCoordinate();
         int y = current.getYCoordinate();
@@ -93,20 +118,24 @@ public class Agent {
             Cell result = grid.get(y - 1)[x];
             if (drift < 0) {
                 // Drift left
-                // System.out.println("drifting left");
                 return moveLeft(grid, result, 0);
             }
             else if (drift > 0) {
                 // Drift right
-                // System.out.println("drifting right");
                 return moveRight(grid, result, 0);
             }
-            // System.out.println();
             return result;
         }
         return null;
     }
 
+    /**
+     * Moves the agent down, with possible drift.
+     * @param grid the grid the agent is operating in.
+     * @param current the current cell that the agent is in.
+     * @param drift the drift integer, which determines which direction the agent will drift, if any.
+     * @return
+     */
     private Cell moveDown(Grid grid, Cell current, int drift) {
         int x = current.getXCoordinate();
         int y = current.getYCoordinate();
@@ -115,20 +144,24 @@ public class Agent {
             Cell result = grid.get(y + 1)[x];
             if (drift < 0) {
                 // Drift left
-                // System.out.println("drifting left");
                 return moveLeft(grid, result, 0);
             }
             else if (drift > 0) {
                 // Drive right
-                // System.out.println("drifting right");
                 return moveRight(grid, result, 0);
             }
-            // System.out.println();
             return result;
         }
         return null;
     }
 
+    /**
+     * Moves the agent left, with possible drift.
+     * @param grid the grid the agent is operating in.
+     * @param current the current cell that the agent is in.
+     * @param drift the drift integer, which determines which direction the agent will drift, if any.
+     * @return
+     */
     private Cell moveLeft(Grid grid, Cell current, int drift) {
         int x = current.getXCoordinate();
         int y = current.getYCoordinate();
@@ -137,20 +170,24 @@ public class Agent {
             Cell result = grid.get(y)[x - 1];
             if (drift < 0) {
                 // Drift down
-                // System.out.println("drifting down");
                 return moveDown(grid, result, 0);    
             }
             else if (drift > 0) {
                 // Drift up
-                // System.out.println("drifting up");
                 return moveUp(grid, result, 0);
             }
-            // System.out.println();
             return result;
         }
         return null;
     }
     
+    /**
+     * Moves the agent right, with possible drift.
+     * @param grid the grid the agent is operating in.
+     * @param current the current cell that the agent is in.
+     * @param drift the drift integer, which determines which direction the agent will drift, if any.
+     * @return
+     */
     private Cell moveRight(Grid grid, Cell current, int drift) {
         int x = current.getXCoordinate();
         int y = current.getYCoordinate();
@@ -160,20 +197,22 @@ public class Agent {
             Cell result = grid.get(y)[x + 1];
             if (drift < 0) {
                 // Drift down
-                // System.out.println("drifting down");
                 return moveDown(grid, result, 0);
             }
             else if (drift > 0) {
                 // Drift up
-                // System.out.println("drifting up");
                 return moveUp(grid, result, 0);
             }
-            // System.out.println();
             return result;
         }
         return null;
     }
 
+    /**
+     * Calculates an integer that determines if the agent will drift and 
+     * in which direction.
+     * @return the drift integer.
+     */
     private int calcDrift() {
         double drift = (1 - actionSuccessProbability) / 2.0;
         double x = Math.random();

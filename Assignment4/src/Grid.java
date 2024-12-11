@@ -1,8 +1,19 @@
 import java.util.*;
 
+/*
+ * Tanner Turba
+ * December 10, 2024
+ * CS 557 - Machine Learning
+ * 
+ * This class defines a grid of cells that an agent can navigate.
+ */
 public class Grid extends ArrayList<Cell[]> {
     private Cell startingCell;
     
+    /**
+     * Instantiates a new instance of the Grid object.
+     * @param scanner used for reading a file.
+     */
     public Grid(Scanner scanner) {
         super();
 
@@ -18,6 +29,7 @@ public class Grid extends ArrayList<Cell[]> {
                         Cell newCell = new Cell(c, x, y);
                         row[x] = newCell;
 
+                        // Note the starting cell
                         if (newCell.getType() == CellType.START) {
                             startingCell = newCell;
                         }
@@ -36,7 +48,12 @@ public class Grid extends ArrayList<Cell[]> {
         return startingCell;
     }
 
-    public String printPolicy() {
+    /**
+     * Prints the policy with the direction the agent should move in each cell.
+     * @param isUnicode uses unicode characters if true.
+     * @return
+     */
+    public String printPolicy(boolean isUnicode) {
         StringBuilder sb = new StringBuilder();
 
         for (Cell[] row : this) {
@@ -46,7 +63,8 @@ public class Grid extends ArrayList<Cell[]> {
                     sb.append(type);
                 }
                 else {
-                    sb.append(cell.getGreedyAction());
+                    ArrayList<Action> bestActions = cell.getGreedyAction();
+                    sb.append(Action.toString(bestActions, isUnicode));
                 }
             }
             sb.append("\n");
@@ -55,15 +73,20 @@ public class Grid extends ArrayList<Cell[]> {
         return sb.toString();
     }
 
+    /**
+     * Prints a grid with all Q values. 
+     * @return
+     */
     public String printGrid() {
         StringBuilder sb = new StringBuilder();
 
         for (Cell[] row : this) {
             for (int i = 0; i < row.length; i++) {
-                sb.append("------------");
+                sb.append("-----------");
             }
             sb.append("\n");
 
+            // Print one action at a time.
             for (Action action : Action.values()) {
                 for (Cell cell : row) {
                     if (action == Action.UP) {
@@ -85,7 +108,7 @@ public class Grid extends ArrayList<Cell[]> {
         }
 
         for (int i = 0; i < this.get(0).length; i++) {
-            sb.append("------------");
+            sb.append("-----------");
         }
         sb.append("\n");
 

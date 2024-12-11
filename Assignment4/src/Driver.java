@@ -1,6 +1,14 @@
 import java.io.*;
 import java.util.*;;
 
+/*
+ * Tanner Turba
+ * December 10, 2024 
+ * CS 557 - Machine Learning
+ * 
+ * The main class in charge of program flow. This program implements the 
+ * SARSA and Q-learning algorithms for a navigation task in a simple grid world environment.
+ */
 public class Driver {
     private String fileName = null;
     private double alpha = 0.9;
@@ -78,6 +86,9 @@ public class Driver {
         readFile();
     }
 
+    /**
+     * Reads data from a file
+     */
     private void readFile() {
         sb.append(String.format("* Reading %s...\n", fileName));
 
@@ -94,39 +105,56 @@ public class Driver {
         agent = new Agent(actionSuccessProbability, grid);
     }
 
+    /**
+     * Returns the string from the StringBuilder.
+     */
     public String toString() {
         return sb.toString();
     }
 
+    /**
+     * Performs training episodes or evaluation episodes, based on the set flags.
+     * @param isTraining true if training.
+     * @param midTraining true if printing during midTraining.
+     * @return
+     */
     public double play(boolean isTraining, boolean midTraining) {
         double alpha = this.alpha;
         double epsilon = this.epsilon;
         int reward = 0;
         int trials = this.trials;
-        if (!midTraining) {
-            if (!isTraining) {
-                trials = 50;
-                sb.append("* Beginning 50 evaluation episodes...\n");
+
+        // Printing commands
+        if (!isTraining && !midTraining) {
+            trials = 50;
+            sb.append("* Beginning 50 evaluation episodes...\n");
+        }
+        else if (isTraining) {
+            String learnType = "SARSA";
+            if (isQLearning) {
+                learnType = "Q-Learning";
             }
-            else {
-                String learnType = "SARSA";
-                if (isQLearning) {
-                    learnType = "Q-Learning";
-                }
-                sb.append(String.format("* Beginning %d learning episodes with %s...\n", trials, learnType));
-                if (verbosity >= 3 && midTraining) {
-                    sb.append("  * After     Avg. Total Reward for\n");
-                    sb.append("  * Episode   Current Greedy Policy\n");
-                } 
-            }
+            sb.append(String.format("* Beginning %d learning episodes with %s...\n", trials, learnType));
+            if (verbosity >= 3) {
+                sb.append("  * After     Avg. Total Reward for\n");
+                sb.append("  * Episode   Current Greedy Policy\n");
+            } 
         }
 
+        // For each episode.
         for (int t = 0; t < trials; t++) {
-            if (t % alphaDecay == 0) {
+            // Calc alpha and epsilon decay.
+            if ((t) % alphaDecay == 0) {
                 alpha = this.alpha / (1 + (t / alphaDecay));
+                if (verbosity >= 4 && !midTraining && t != 0) {
+                    sb.append(String.format("    (after episode %d, alpha to %.5f)\n", t, alpha));
+                }
             }
-            if (t % epsilonDecay == 0) {
+            if ((t) % epsilonDecay == 0) {
                 epsilon = this.epsilon / (1 + (t / epsilonDecay));
+                if (verbosity >= 4 && !midTraining && t != 0) {
+                    sb.append(String.format("    (after episode %d, epsilon to %.5f)\n", t, epsilon));
+                }
             }
             
             // Place agent at start.
@@ -168,13 +196,12 @@ public class Driver {
                 s = sPrime;
                 a = aPrime;
             }
-            // System.out.println(grid.printGrid());
             reward += agent.getScore();
 
-            if (verbosity >= 3 && isTraining && t % (trials / 10) == 0) {
+            // Printing commands.
+            if (verbosity >= 3 && isTraining && (t + 1) % (trials / 10) == 0) {
                 double rwrd = play(false, true);
-                sb.append(String.format("    %-7d %6.3f\n", t, rwrd));
-                // sb.append(grid.printGrid());
+                sb.append(String.format("    %7d     %6.3f\n", t+1, rwrd));
             }
         }
 
@@ -185,7 +212,7 @@ public class Driver {
             }
             else {
                 sb.append(String.format("  Avg. Total Reward of Learned Policy: %.3f\n", avgReward));
-                sb.append(String.format("* Learned greedy policy:\n%s", grid.printPolicy()));
+                sb.append(String.format("* Learned greedy policy:\n%s", grid.printPolicy(isUnicode)));
                 if (verbosity >= 2) {
                     sb.append(String.format("* Learned Q values:\n%s", grid.printGrid()));
                 }
@@ -194,6 +221,12 @@ public class Driver {
         return avgReward;
     }
     
+    /**
+     * Performs the epsilon-greedy policy to determine which action to take.
+     * @param epsilon the threshold for using random or greedy action.
+     * @param isTraining if false, deactivates the random action.
+     * @return
+     */
     private Action epsilonGreedyPolicy(double epsilon, boolean isTraining) {
         Cell currentState = agent.getCurrentCell();
 
@@ -215,7 +248,7 @@ public class Driver {
         }
         else {
             // Best action
-            return currentState.getGreedyAction();
+            return currentState.getGreedyAction().get(0);
         }
     }
 
@@ -228,6 +261,7 @@ public class Driver {
         // Evaluate
         driver.play(false, false);
         
+        // Print
         System.out.println(driver);
     }
 }

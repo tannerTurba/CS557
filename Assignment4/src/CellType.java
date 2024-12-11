@@ -1,10 +1,10 @@
 /*
  * Tanner Turba
- * December 3, 2024
+ * December 10, 2024
  * CS 557 - Machine Learning
  * 
- * This is the enumeration that supports the extra credit activation function options. 
- * For each available option, the activation function, g, can be calculated as well as its derivative, g'.
+ * This is the enumeration that defines a cell's type and aids in 
+ * managing a cell's type-based attributes and printing.
  */
 public enum CellType {
     START,
@@ -41,14 +41,25 @@ public enum CellType {
         }
     }
 
+    /**
+     * Determines if an instance of celltype is terminal.
+     * @return
+     */
     public boolean isTerminal() {
         return this == MINE || this == GOAL;
     }
 
+    /**
+     * Determines if an instance of celltype is blocking.
+     * @return
+     */
     public boolean isBlocking() {
         return this == BLOCK;
     }
 
+    /**
+     * Converts a celltype to its string representation.
+     */
     public String toString() {
         switch (this) {
             case START:
